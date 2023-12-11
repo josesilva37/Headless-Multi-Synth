@@ -13,8 +13,6 @@ public:
                                           int numSamples,
                                           const juce::AudioIODeviceCallbackContext& callbackContext) override
     {
-        // Your audio processing logic here...
-        // Call the oscillator to generate audio samples
         juce::dsp::AudioBlock<float> outputBlock(outputChannelData, numOutputChannels, numSamples);
         juce::dsp::ProcessContextReplacing<float> context(outputBlock);
         myOscillator.process(context);
