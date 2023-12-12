@@ -14,5 +14,13 @@ public:
     void pitchWheelMoved (int newPitchWheelValue) override;
     void prepareToPlay (double sampleRate, int samplesPerBlock, int outputChannels);
     void renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int startSample, int numSamples) override;
+private:
+    enum
+    {
+        oscIndex,
+        gainIndex // [2]
+    };
+
+    juce::dsp::ProcessorChain<juce::dsp::Oscillator<float>, juce::dsp::Gain<float>> processorChain;
 
 };

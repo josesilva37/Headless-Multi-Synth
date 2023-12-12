@@ -1,5 +1,7 @@
 #include <JuceHeader.h>
 #include "CarrOsc.h"
+#include "SynthVoice.h"
+#include "SynthSound.h"
 
 class MyAudioIODeviceCallback : public juce::AudioIODeviceCallback
 {
@@ -13,9 +15,8 @@ public:
                                           int numSamples,
                                           const juce::AudioIODeviceCallbackContext& callbackContext) override
     {
-        juce::dsp::AudioBlock<float> outputBlock(outputChannelData, numOutputChannels, numSamples);
-        juce::dsp::ProcessContextReplacing<float> context(outputBlock);
-        myOscillator.process(context);
+        // myOscillator.process(context);
+        // synth.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
     }
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) override
@@ -29,35 +30,32 @@ public:
     }
 
 private:
+    // juce::Synthesiser synth;
     CarrOsc &myOscillator;
 };
 
 int main()
 {
+    juce::Synthesiser synth;
     juce::AudioDeviceManager devmgr;
     devmgr.initialiseWithDefaultDevices(0, 2);
     juce::AudioIODevice *device = devmgr.getCurrentAudioDevice();
+
+    synth.addSound (new SynthSound());
+    synth.addVoice (new SynthVoice());
+
+    synth.getVoice(0)->prepareToPlay (44100.0, 512, 2);
     // Create an instance of CarrOsc
-    CarrOsc osc;
-
-    // Set up the audio processing specifications
-    juce::dsp::ProcessSpec processSpec;
-    processSpec.sampleRate = 44100.0;   // Set your desired sample rate
-    processSpec.maximumBlockSize = 512; // Set your desired block size
-    processSpec.numChannels = 2;        // Set your desired number of channels
-
     // Initialize the oscillator
-    osc.prepare(processSpec);
+    // osc.prepare(44100.0,512,2);
 
-    osc.setFrequency(440.0, true); // Set the frequency to 440 Hz
-    osc.setLevel(0.5);             // Set the level to 0.5
-
-    MyAudioIODeviceCallback audioIODeviceCallback(osc);
+    MyAudioIODeviceCallback audioIODeviceCallback(synth);
     // Add the audio device callback
     devmgr.addAudioCallback(&audioIODeviceCallback);
 
     // Start the audio device
     devmgr.restartLastAudioDevice();
+
 
     // Run the message loop
     while (true)
