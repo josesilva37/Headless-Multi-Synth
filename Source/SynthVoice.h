@@ -1,7 +1,7 @@
 #pragma once
 
 #include <JuceHeader.h>
-#include <SynthSound.h>
+#include "SynthSound.h"
 
 
 class SynthVoice: public juce::SynthesiserVoice
@@ -22,5 +22,6 @@ private:
     };
 
     juce::dsp::ProcessorChain<juce::dsp::Oscillator<float>, juce::dsp::Gain<float>> processorChain;
-
+    juce::ADSR adsr;
+    juce::ADSR::Parameters adsrParams;
 };

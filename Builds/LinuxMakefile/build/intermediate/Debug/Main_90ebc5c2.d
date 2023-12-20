@@ -556,4 +556,5 @@ build/intermediate/Debug/Main_90ebc5c2.o: ../../Source/Main.cpp \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_WebBrowserComponent.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_LiveConstantEditor.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h \
- ../../Source/CarrOsc.h
+ ../../Source/CarrOsc.h ../../Source/SynthVoice.h \
+ ../../Source/SynthSound.h
