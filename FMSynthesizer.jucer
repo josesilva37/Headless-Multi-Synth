@@ -8,8 +8,6 @@
       <FILE id="gQeSKo" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>
       <FILE id="wY5sFo" name="SynthVoice.h" compile="0" resource="0" file="Source/SynthVoice.h"/>
       <FILE id="ZgTHQf" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
-      <FILE id="XfdaZO" name="CarrOsc.cpp" compile="1" resource="0" file="Source/CarrOsc.cpp"/>
-      <FILE id="roGVgw" name="CarrOsc.h" compile="0" resource="0" file="Source/CarrOsc.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

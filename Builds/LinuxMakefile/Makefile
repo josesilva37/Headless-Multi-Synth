@@ -74,7 +74,6 @@ endif
 OBJECTS_CONSOLEAPP := \
   $(JUCE_OBJDIR)/SynthVoice_279f55df.o \
   $(JUCE_OBJDIR)/Main_90ebc5c2.o \
-  $(JUCE_OBJDIR)/CarrOsc_8e3f66e2.o \
   $(JUCE_OBJDIR)/include_juce_audio_basics_8a4e984a.o \
   $(JUCE_OBJDIR)/include_juce_audio_devices_63111d02.o \
   $(JUCE_OBJDIR)/include_juce_audio_formats_15f82001.o \
@@ -111,11 +110,6 @@ $(JUCE_OBJDIR)/SynthVoice_279f55df.o: ../../Source/SynthVoice.cpp
 $(JUCE_OBJDIR)/Main_90ebc5c2.o: ../../Source/Main.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling Main.cpp"
-	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_CONSOLEAPP) $(JUCE_CFLAGS_CONSOLEAPP) -o "$@" -c "$<"
-
-$(JUCE_OBJDIR)/CarrOsc_8e3f66e2.o: ../../Source/CarrOsc.cpp
-	-$(V_AT)mkdir -p $(@D)
-	@echo "Compiling CarrOsc.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_CONSOLEAPP) $(JUCE_CFLAGS_CONSOLEAPP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/include_juce_audio_basics_8a4e984a.o: ../../JuceLibraryCode/include_juce_audio_basics.cpp

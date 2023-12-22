@@ -1,5 +1,4 @@
 #include <JuceHeader.h>
-#include "CarrOsc.h"
 #include "SynthVoice.h"
 #include "SynthSound.h"
 
@@ -15,13 +14,11 @@ public:
                                           int numSamples,
                                           const juce::AudioIODeviceCallbackContext &callbackContext) override
     {
-        // myOscillator.process(context);
-        // synth.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
         juce::MidiBuffer midiMessages;
         juce::AudioBuffer<float> buffer(outputChannelData, numOutputChannels, numSamples);
-        // Render the next block using the synthesizer
-        mySynth.renderNextBlock(buffer, midiMessages, 0, numSamples);
-    }
+        mySynth.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
+        
+    } 
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) override
     {
@@ -46,12 +43,11 @@ int main()
 
     synth.addSound(new SynthSound());
     synth.addVoice(new SynthVoice());
-
+    synth.setCurrentPlaybackSampleRate(44100);
     if (auto voice = dynamic_cast<SynthVoice *>(synth.getVoice(0)))
     {
         voice->prepareToPlay(44100.0, 512, 2);
     }
-
 
     MyAudioIODeviceCallback audioIODeviceCallback(synth);
     // Add the audio device callback
@@ -63,8 +59,8 @@ int main()
     // Run the message loop
     while (true)
     {
+        synth.noteOn(1, 60, 0.5f);
 
-        // Sleep to prevent high CPU usage
         juce::Thread::sleep(100);
     }
 
