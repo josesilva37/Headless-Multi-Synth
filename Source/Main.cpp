@@ -2,7 +2,8 @@
 #include "SynthVoice.h"
 #include "SynthSound.h"
 
-class MyAudioIODeviceCallback : public juce::AudioIODeviceCallback
+class MyAudioIODeviceCallback : public juce::AudioIODeviceCallback,
+                                public juce::MidiInputCallback
 {
 public:
     MyAudioIODeviceCallback(juce::Synthesiser &synth) : mySynth(synth) {}
@@ -16,31 +17,31 @@ public:
     {
         juce::MidiBuffer midiMessages;
         juce::AudioBuffer<float> buffer(outputChannelData, numOutputChannels, numSamples);
+
         mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     }
-    // void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override
-    // {
-    //     // Handle incoming MIDI message
-    //     juce::Logger::writeToLog("Received MIDI message: " + message.getDescription());
+    void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override
+    {
+        // Handle incoming MIDI message
+        juce::Logger::writeToLog("Received MIDI message: " + message.getDescription());
 
-    //     // Example: Trigger a note
-    //     if (message.isNoteOn())
-    //     {
-    //         int noteNumber = message.getNoteNumber();
-    //         float velocity = message.getVelocity();
+        if (message.isNoteOn())
+        {
+            int noteNumber = message.getNoteNumber();
+            float velocity = message.getVelocity();
 
-    //         // Trigger a note in your synth
-    //         mySynth.noteOn(1, noteNumber, velocity);
-    //     }
-    //     else if (message.isNoteOff())
-    //     {
-    //         int noteNumber = message.getNoteNumber();
-    //         float velocity = message.getVelocity();
+            // Trigger a note in your synth
+            mySynth.noteOn(1, noteNumber, velocity);
+        }
+        else if (message.isNoteOff())
+        {
+            int noteNumber = message.getNoteNumber();
+            float velocity = message.getVelocity();
 
-    //         // Release the corresponding note in your synth
-    //         mySynth.noteOff(1, noteNumber,velocity, false);
-    //     }
-    // }
+            // Release the corresponding note in your synth
+            mySynth.noteOff(1, noteNumber,velocity, false);
+        }
+    };
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) override
     {
@@ -78,17 +79,18 @@ int main()
 
     for (auto input : midiInputs)
     {
-        juce::Logger::writeToLog(input.name);
+        juce::Logger::writeToLog(input.identifier);
     }
+    devmgr.setMidiInputDeviceEnabled(midiInputs[1].identifier, true);
+    devmgr.addMidiInputDeviceCallback(midiInputs[1].identifier, &audioIODeviceCallback);
 
-    
-    // Start the audio device
+    juce::Logger::writeToLog(devmgr.getDefaultMidiOutputIdentifier());
+
     devmgr.restartLastAudioDevice();
-
     // Run the message loop
     while (true)
     {
-        synth.noteOn(1, 60, 0.5f);
+        // synth.noteOn(1, 60, 0.5f);
 
         juce::Thread::sleep(100);
     }
