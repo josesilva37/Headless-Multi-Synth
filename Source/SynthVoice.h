@@ -15,13 +15,7 @@ public:
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override;
 
 private:
-    // enum
-    // {
-    //     oscIndex,
-    //     gainIndex // [2]
-    // };
 
-    // juce::dsp::ProcessorChain<juce::dsp::Oscillator<float>, juce::dsp::Gain<float>> processorChain;
     juce::dsp::Oscillator<float> osc{[](float x)
                                      { return x < 0.0f ? -1.0f : 1.0f; },
                                      200};

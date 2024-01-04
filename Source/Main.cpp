@@ -16,9 +16,31 @@ public:
     {
         juce::MidiBuffer midiMessages;
         juce::AudioBuffer<float> buffer(outputChannelData, numOutputChannels, numSamples);
-        mySynth.renderNextBlock (buffer, midiMessages, 0, buffer.getNumSamples());
-        
-    } 
+        mySynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    }
+    // void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override
+    // {
+    //     // Handle incoming MIDI message
+    //     juce::Logger::writeToLog("Received MIDI message: " + message.getDescription());
+
+    //     // Example: Trigger a note
+    //     if (message.isNoteOn())
+    //     {
+    //         int noteNumber = message.getNoteNumber();
+    //         float velocity = message.getVelocity();
+
+    //         // Trigger a note in your synth
+    //         mySynth.noteOn(1, noteNumber, velocity);
+    //     }
+    //     else if (message.isNoteOff())
+    //     {
+    //         int noteNumber = message.getNoteNumber();
+    //         float velocity = message.getVelocity();
+
+    //         // Release the corresponding note in your synth
+    //         mySynth.noteOff(1, noteNumber,velocity, false);
+    //     }
+    // }
 
     void audioDeviceAboutToStart(juce::AudioIODevice *device) override
     {
@@ -40,7 +62,7 @@ int main()
     juce::AudioDeviceManager devmgr;
     devmgr.initialiseWithDefaultDevices(0, 2);
     juce::AudioIODevice *device = devmgr.getCurrentAudioDevice();
-
+    int lastInputIndex = 0;
     synth.addSound(new SynthSound());
     synth.addVoice(new SynthVoice());
     synth.setCurrentPlaybackSampleRate(44100);
@@ -52,7 +74,14 @@ int main()
     MyAudioIODeviceCallback audioIODeviceCallback(synth);
     // Add the audio device callback
     devmgr.addAudioCallback(&audioIODeviceCallback);
+    auto midiInputs = juce::MidiInput::getAvailableDevices();
 
+    for (auto input : midiInputs)
+    {
+        juce::Logger::writeToLog(input.name);
+    }
+
+    
     // Start the audio device
     devmgr.restartLastAudioDevice();
 
