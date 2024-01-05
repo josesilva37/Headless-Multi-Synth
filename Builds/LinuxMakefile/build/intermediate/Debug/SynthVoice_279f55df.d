@@ -557,4 +557,4 @@ build/intermediate/Debug/SynthVoice_279f55df.o: \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_WebBrowserComponent.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_LiveConstantEditor.h \
  ../../JuceLibraryCode/modules/juce_gui_extra/misc/juce_AnimatedAppComponent.h \
- ../../Source/SynthSound.h
+ ../../Source/SynthSound.h ../../Source/Data/OscData.h

@@ -39,7 +39,45 @@ public:
             float velocity = message.getVelocity();
 
             // Release the corresponding note in your synth
-            mySynth.noteOff(1, noteNumber,velocity, false);
+            mySynth.noteOff(1, noteNumber, velocity, false);
+        }
+        else if (message.isController())
+        {
+            // Handle Control Change message
+            int controllerValue = message.getControllerValue();
+            // Your code here for Control Change handling
+            int controllerNumber = message.getControllerNumber();
+            // Value
+            // std::string controllerValueString = std::to_string(controllerValue);
+            // juce::Logger::writeToLog(controllerValueString);
+            // juce::Logger::writeToLog("MIDI Controller Number: " + juce::String(controllerNumber));
+            if (controllerNumber == 127)
+            {
+                switch (controllerValue)
+                {
+                case 0:
+                    if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                    {
+                        voice->getOscillator().setType(0);
+                    }
+                    break;
+                case 1:
+                    if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                    {
+                        voice->getOscillator().setType(1);
+                    }
+                    break;
+                case 2:
+                    if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                    {
+                        voice->getOscillator().setType(2);
+                    }
+                    break;
+
+                default:
+                    break;
+                }
+            }
         }
     };
 
@@ -65,12 +103,28 @@ int main()
     juce::AudioIODevice *device = devmgr.getCurrentAudioDevice();
     int lastInputIndex = 0;
     synth.addSound(new SynthSound());
+
     synth.addVoice(new SynthVoice());
+
+    // for (int i = 0; i < 5; i++)
+    // {
+    //     synth.addVoice (new SynthVoice());
+    // }
+
     synth.setCurrentPlaybackSampleRate(44100);
+
     if (auto voice = dynamic_cast<SynthVoice *>(synth.getVoice(0)))
     {
+        // voice->getOscillator().setType(0);
         voice->prepareToPlay(44100.0, 512, 2);
     }
+    // for (int i = 0; i < synth.getNumVoices(); i++)
+    // {
+    //     if (auto voice = dynamic_cast<SynthVoice *>(synth.getVoice(i)))
+    //     {
+    //         voice->prepareToPlay(44100.0, 512, 2);
+    //     }
+    // }
 
     MyAudioIODeviceCallback audioIODeviceCallback(synth);
     // Add the audio device callback
@@ -90,8 +144,6 @@ int main()
     // Run the message loop
     while (true)
     {
-        // synth.noteOn(1, 60, 0.5f);
-
         juce::Thread::sleep(100);
     }
 

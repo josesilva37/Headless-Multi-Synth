@@ -2,6 +2,7 @@
 
 #include <JuceHeader.h>
 #include "SynthSound.h"
+#include "Data/OscData.h"
 
 class SynthVoice : public juce::SynthesiserVoice
 {
@@ -13,12 +14,13 @@ public:
     void pitchWheelMoved(int newPitchWheelValue) override;
     void prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels);
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override;
-
+    OscData& getOscillator() {return osc;};
 private:
 
-    juce::dsp::Oscillator<float> osc{[](float x)
-                                     { return x < 0.0f ? -1.0f : 1.0f; },
-                                     200};
+    OscData osc;
+    // juce::dsp::Oscillator<float> osc{[](float x)
+    //                                  { return x < 0.0f ? -1.0f : 1.0f; },
+    //                                  200};
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
