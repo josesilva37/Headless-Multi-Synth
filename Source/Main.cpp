@@ -78,6 +78,12 @@ public:
                     break;
                 }
             }
+            if(controllerNumber == 126){
+                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                    {
+                        voice->getOscillator().setGain(controllerValue);
+                    }
+            }
         }
     };
 
