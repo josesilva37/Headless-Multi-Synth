@@ -14,6 +14,10 @@ public:
     void pitchWheelMoved(int newPitchWheelValue) override;
     void prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels);
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override;
+    void changeAttack(float attackValue);
+    void changeDecay(float decayValue);
+    void changeSustain(float sustainValue);
+    void changeRelease(float releaseValue);
     OscData& getOscillator() {return osc;};
 private:
 

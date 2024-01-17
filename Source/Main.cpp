@@ -51,8 +51,9 @@ public:
             // std::string controllerValueString = std::to_string(controllerValue);
             // juce::Logger::writeToLog(controllerValueString);
             // juce::Logger::writeToLog("MIDI Controller Number: " + juce::String(controllerNumber));
-            if (controllerNumber == 127)
+            switch (controllerNumber)
             {
+            case (127):
                 switch (controllerValue)
                 {
                 case 0:
@@ -77,12 +78,31 @@ public:
                 default:
                     break;
                 }
-            }
-            if(controllerNumber == 126){
-                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                    {
-                        voice->getOscillator().setGain(controllerValue);
-                    }
+            case (126):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->getOscillator().setGain(controllerValue);
+                }
+            case (36):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->changeAttack(controllerValue);
+                }
+            case (37):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->changeDecay(controllerValue);
+                }
+            case (38):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->changeRelease(controllerValue);
+                }
+            case (39):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->changeSustain(controllerValue);
+                }
             }
         }
     };

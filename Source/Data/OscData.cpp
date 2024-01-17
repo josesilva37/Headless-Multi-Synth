@@ -45,7 +45,7 @@ void OscData::setGain(const float levelInDecibels)
 }
 float OscData::getGain()
 {  
-    return gain.getGainLinear();
+    return gain.getGainLinear();    
 }
 bool OscData::isGainSet()
 {
