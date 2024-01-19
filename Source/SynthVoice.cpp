@@ -8,22 +8,22 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound *sound)
 void SynthVoice::changeAttack(float attackValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
-    juce::Logger::writeToLog("Attack1: " + juce::String(adsr.getParameters().attack));
-    juce::Logger::writeToLog("Decay1: " + juce::String(adsr.getParameters().decay));
 
     parameters.attack = attackValue/100;
-    juce::Logger::writeToLog("Attack2: " + juce::String(adsr.getParameters().attack));
-    juce::Logger::writeToLog("Decay2: " + juce::String(adsr.getParameters().decay));
-
+    
     adsr.setParameters(parameters);
-     juce::Logger::writeToLog("Attack3: " + juce::String(adsr.getParameters().attack));
-    juce::Logger::writeToLog("Decay3: " + juce::String(adsr.getParameters().decay));
+
 
 };
 void SynthVoice::changeDecay(float decayValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
     parameters.decay = decayValue/100;
+    juce::Logger::writeToLog("ADSR Parameters: ");
+    juce::Logger::writeToLog("Attack: " + juce::String(parameters.attack));
+    juce::Logger::writeToLog("Decay: " + juce::String(parameters.decay));
+    juce::Logger::writeToLog("Sustain: " + juce::String(parameters.release));
+    juce::Logger::writeToLog("Release: " + juce::String(parameters.sustain));
     adsr.setParameters(parameters);
 };
 void SynthVoice::changeSustain(float sustainValue)
@@ -44,8 +44,8 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
     juce::Logger::writeToLog("ADSR Parameters: ");
     juce::Logger::writeToLog("Attack: " + juce::String(adsr.getParameters().attack));
     juce::Logger::writeToLog("Decay: " + juce::String(adsr.getParameters().decay));
-    juce::Logger::writeToLog("Sustain: " + juce::String(adsr.getParameters().release));
-    juce::Logger::writeToLog("Release: " + juce::String(adsr.getParameters().sustain));
+    juce::Logger::writeToLog("Sustain: " + juce::String(adsr.getParameters().sustain));
+    juce::Logger::writeToLog("Release: " + juce::String(adsr.getParameters().release));
     adsr.noteOn();
 };
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
@@ -78,11 +78,16 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
     osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     // juce::Logger::writeToLog(juce::String(gain.getGainDecibels()));
-
+    
     if (osc.isGainSet())
     {
         gain.setGainLinear(osc.getGain());
     }
+    // juce::Logger::writeToLog("Attack: " + juce::String(adsr.getParameters().attack));
+    // juce::Logger::writeToLog("Decay: " + juce::String(adsr.getParameters().decay));
+    // juce::Logger::writeToLog("Sustain: " + juce::String(adsr.getParameters().sustain));
+    // juce::Logger::writeToLog("Release: " + juce::String(adsr.getParameters().release));
+
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());

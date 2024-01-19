@@ -50,7 +50,8 @@ public:
             // Value
             // std::string controllerValueString = std::to_string(controllerValue);
             // juce::Logger::writeToLog(controllerValueString);
-            // juce::Logger::writeToLog("MIDI Controller Number: " + juce::String(controllerNumber));
+            juce::Logger::writeToLog("MIDI Controller Number: " + juce::String(controllerNumber));
+
             switch (controllerNumber)
             {
             case (127):
@@ -78,31 +79,52 @@ public:
                 default:
                     break;
                 }
+                break;
             case (126):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     voice->getOscillator().setGain(controllerValue);
                 }
+                break;
+
             case (36):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
+                    juce::Logger::writeToLog("Entrei no changeAttack");
+
                     voice->changeAttack(controllerValue);
                 }
+                break;
+
             case (37):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
+                    juce::Logger::writeToLog("Entrei no changeDecay");
+
                     voice->changeDecay(controllerValue);
                 }
+                break;
+
             case (38):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    voice->changeRelease(controllerValue);
+                    juce::Logger::writeToLog("Entrei no changeSustain");
+
+                    voice->changeSustain(controllerValue);
                 }
+                break;
+
             case (39):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    voice->changeSustain(controllerValue);
+                    juce::Logger::writeToLog("Entrei no changeRelease");
+
+                    voice->changeRelease(controllerValue);
                 }
+                break;
+
+            default:
+                break;
             }
         }
     };
