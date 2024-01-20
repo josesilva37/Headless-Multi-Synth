@@ -15,20 +15,20 @@
 class OscData : public juce::dsp::Oscillator<float>
 {
 public:
-  // void prepareToPlay (double sampleRate, int samplesPerBlock, int outputChannels);
+  void prepareToPlay ( juce::dsp::ProcessSpec spec);
   void setType(const int oscSelection);
   void setGain(const float levelInDecibels);
   float getGain();
   bool isGainSet();
-  // void setOscPitch (const int pitch);
-  // void setFreq (const int midiNoteNumber);
-  // void setFmOsc (const float freq, const float depth);
-  // void renderNextBlock (juce::dsp::AudioBlock<float>& audioBlock);
-  // float processNextSample (float input);
-  // void setParams (const int oscChoice, const float oscGain, const int oscPitch, const float fmFreq, const float fmDepth);
-  // void resetAll();
-
+  void getNextAudioBlock(juce::dsp::AudioBlock<float>& block);
+  void setWaveFrequency(const int midiNoteNumber);
+  void setFmFreq(const float freq);
+  void setFmDepth(const float depth);
 private:
+  juce::dsp::Oscillator<float> fmOsc { [](float x) { return std::sin (x); }};
+  float fmMod {5.0f};
+  float fmDepth {500.0f};
+  int lastMidiNote {0};
   juce::dsp::Gain<float> gain;
   bool wasGainSet;
 };

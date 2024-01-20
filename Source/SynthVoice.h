@@ -18,13 +18,12 @@ public:
     void changeDecay(float decayValue);
     void changeSustain(float sustainValue);
     void changeRelease(float releaseValue);
+    void changeFmDepth(float depth);
+    void changeFmFreq(float freq);
     OscData& getOscillator() {return osc;};
 private:
 
     OscData osc;
-    // juce::dsp::Oscillator<float> osc{[](float x)
-    //                                  { return x < 0.0f ? -1.0f : 1.0f; },
-    //                                  200};
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;

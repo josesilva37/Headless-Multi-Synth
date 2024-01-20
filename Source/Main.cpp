@@ -122,6 +122,38 @@ public:
                     voice->changeRelease(controllerValue);
                 }
                 break;
+            case (40):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    juce::Logger::writeToLog("Entrei no changeFmFreq");
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minFrequency = 10.0;
+                    double maxFrequency = 20000.0;
+
+                    // Calculate the scaled frequency
+                    double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->changeFmFreq(scaledFrequency);
+                }
+                break;
+            case (41):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    juce::Logger::writeToLog("Entrei no changeFmDepth");
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minFrequency = 0;
+                    double maxFrequency = 20000.0;
+
+                    // Calculate the scaled frequency
+                    double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->changeFmDepth(scaledFrequency);
+                }
+                break;
 
             default:
                 break;

@@ -5,6 +5,14 @@ bool SynthVoice::canPlaySound(juce::SynthesiserSound *sound)
     return dynamic_cast<juce::SynthesiserSound *>(sound) != nullptr;
 };
 
+void SynthVoice::changeFmDepth(float depth)
+{
+    osc.setFmDepth(depth);
+}
+void SynthVoice::changeFmFreq(float freq)
+{
+    osc.setFmFreq(freq);
+}
 void SynthVoice::changeAttack(float attackValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
@@ -12,8 +20,6 @@ void SynthVoice::changeAttack(float attackValue)
     parameters.attack = attackValue/100;
     
     adsr.setParameters(parameters);
-
-
 };
 void SynthVoice::changeDecay(float decayValue)
 {
@@ -40,7 +46,7 @@ void SynthVoice::changeRelease(float releaseValue)
 };
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
-    osc.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
+    osc.setWaveFrequency(midiNoteNumber);
     juce::Logger::writeToLog("ADSR Parameters: ");
     juce::Logger::writeToLog("Attack: " + juce::String(adsr.getParameters().attack));
     juce::Logger::writeToLog("Decay: " + juce::String(adsr.getParameters().decay));
@@ -66,8 +72,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = outputChannels;
-
-    osc.prepare(spec);
+    
+    osc.prepareToPlay(spec);
     osc.setType(0);
     gain.prepare(spec);
     gain.setGainLinear(0.5f);
@@ -76,7 +82,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
-    osc.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    osc.getNextAudioBlock(audioBlock);
     // juce::Logger::writeToLog(juce::String(gain.getGainDecibels()));
     
     if (osc.isGainSet())
