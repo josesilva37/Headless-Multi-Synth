@@ -27,7 +27,7 @@ public:
 private:
   juce::dsp::Oscillator<float> fmOsc { [](float x) { return std::sin (x); }};
   float fmMod {5.0f};
-  float fmDepth {500.0f};
+  float fmDepth {0};
   int lastMidiNote {0};
   juce::dsp::Gain<float> gain;
   bool wasGainSet;

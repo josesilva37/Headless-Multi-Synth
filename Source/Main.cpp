@@ -145,13 +145,13 @@ public:
                     int minControllerValue = 0;
                     int maxControllerValue = 127;
 
-                    double minFrequency = 0;
-                    double maxFrequency = 20000.0;
+                    double minModulation = 0.0;
+                    double maxModulation = 2000.0;
 
                     // Calculate the scaled frequency
-                    double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    double scaledModulation = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
 
-                    voice->changeFmDepth(scaledFrequency);
+                    voice->changeFmDepth(scaledModulation);
                 }
                 break;
 
