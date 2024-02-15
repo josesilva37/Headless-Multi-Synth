@@ -17,6 +17,7 @@ class OscData : public juce::dsp::Oscillator<float>
 public:
   void prepareToPlay ( juce::dsp::ProcessSpec spec);
   void setType(const int oscSelection);
+  int getType();
   void setGain(const float levelInDecibels);
   float getGain();
   bool isGainSet();
@@ -31,4 +32,5 @@ private:
   int lastMidiNote {0};
   juce::dsp::Gain<float> gain;
   bool wasGainSet;
+  int type;
 };

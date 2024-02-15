@@ -21,27 +21,32 @@ void OscData::setType(const int oscSelection)
     {
     // Sine
     case 0:
+        type = 0;
         initialise([](float x)
                    { return std::sin(x); });
         break;
 
     // Saw
     case 1:
+        type = 1;
         initialise([](float x)
                    { return x / juce::MathConstants<float>::pi; });
         break;
 
     // Square
     case 2:
+        type = 2;
         initialise([](float x)
                    { return x < 0.0f ? -1.0f : 1.0f; });
         break;
 
     default:
-        // You shouldn't be here!
         jassertfalse;
         break;
     }
+}
+int OscData::getType(){
+    return type;
 }
 void OscData::setGain(const float levelInDecibels)
 {
@@ -82,7 +87,7 @@ void OscData::getNextAudioBlock(juce::dsp::AudioBlock<float> &block)
             fmMod = fmOsc.processSample(block.getSample(ch, s)) * fmDepth;
         }
     }
-    juce::Logger::writeToLog(juce::String(fmOsc.getFrequency()) + "  -  " + juce::String(fmDepth));
+    // juce::Logger::writeToLog(juce::String(fmOsc.getFrequency()) + "  -  " + juce::String(fmDepth));
 
     process(juce::dsp::ProcessContextReplacing<float>(block));
 }

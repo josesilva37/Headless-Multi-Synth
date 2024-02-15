@@ -54,40 +54,50 @@ public:
 
             switch (controllerNumber)
             {
-            case (127):
-                switch (controllerValue)
+            case (113):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                case 0:
-                    if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                    {
-                        voice->getOscillator().setType(0);
+                    int type = voice->getOscillator().getType();
+                    if(type != 2){
+                        type = type +1;
+                    }else{
+                        type = 0;
                     }
-                    break;
-                case 1:
-                    if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                    switch (type)
                     {
-                        voice->getOscillator().setType(1);
-                    }
-                    break;
-                case 2:
-                    if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                    {
-                        voice->getOscillator().setType(2);
-                    }
-                    break;
+                    case 0:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setType(0);
+                        }
+                        break;
+                    case 1:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setType(1);
+                        }
+                        break;
+                    case 2:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setType(2);
+                        }
+                        break;
 
-                default:
-                    break;
+                    default:
+                        break;
+                    }
                 }
+
                 break;
-            case (126):
+            case (18):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     voice->getOscillator().setGain(controllerValue);
                 }
                 break;
 
-            case (36):
+            case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     juce::Logger::writeToLog("Entrei no changeAttack");
@@ -96,7 +106,7 @@ public:
                 }
                 break;
 
-            case (37):
+            case (76):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     juce::Logger::writeToLog("Entrei no changeDecay");
@@ -105,7 +115,7 @@ public:
                 }
                 break;
 
-            case (38):
+            case (77):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     juce::Logger::writeToLog("Entrei no changeSustain");
@@ -114,7 +124,7 @@ public:
                 }
                 break;
 
-            case (39):
+            case (93):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     juce::Logger::writeToLog("Entrei no changeRelease");
@@ -122,34 +132,34 @@ public:
                     voice->changeRelease(controllerValue);
                 }
                 break;
-            case (40):
+            case (19):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    juce::Logger::writeToLog("Entrei no changeFmFreq");
                     int minControllerValue = 0;
                     int maxControllerValue = 127;
 
-                    double minFrequency = 10.0;
-                    double maxFrequency = 20000.0;
+                    double minFrequency = 0.0f;
+                    double maxFrequency = 1000.0f;
 
                     // Calculate the scaled frequency
                     double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    juce::Logger::writeToLog("Entrei no changeFmFreq: " + juce::String(scaledFrequency) );
 
                     voice->changeFmFreq(scaledFrequency);
                 }
                 break;
-            case (41):
+            case (16):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    juce::Logger::writeToLog("Entrei no changeFmDepth");
                     int minControllerValue = 0;
                     int maxControllerValue = 127;
 
-                    double minModulation = 0.0;
-                    double maxModulation = 2000.0;
+                    double minModulation = 0.0f;
+                    double maxModulation = 100.0f;
 
                     // Calculate the scaled frequency
                     double scaledModulation = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    juce::Logger::writeToLog("Entrei no changeFmDepth: " + juce::String(scaledModulation));
 
                     voice->changeFmDepth(scaledModulation);
                 }
