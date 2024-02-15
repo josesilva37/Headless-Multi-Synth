@@ -72,6 +72,7 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_CONSOLEAPP := \
+  $(JUCE_OBJDIR)/FilterData_fbdcfbc8.o \
   $(JUCE_OBJDIR)/OscData_4e94a44d.o \
   $(JUCE_OBJDIR)/SynthVoice_279f55df.o \
   $(JUCE_OBJDIR)/Main_90ebc5c2.o \
@@ -96,6 +97,11 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_CONSOLEAPP) : $(OBJECTS_CONSOLEAPP) $(JUCE_OBJDIR)/
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_CONSOLEAPP) $(OBJECTS_CONSOLEAPP) $(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/FilterData_fbdcfbc8.o: ../../Source/Data/FilterData.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling FilterData.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_CONSOLEAPP) $(JUCE_CFLAGS_CONSOLEAPP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/OscData_4e94a44d.o: ../../Source/Data/OscData.cpp
 	-$(V_AT)mkdir -p $(@D)
