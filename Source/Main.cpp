@@ -99,6 +99,51 @@ public:
                 }
 
                 break;
+            case (115):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int type = voice->getOscillator().getFmType();
+                    if (type != 3)
+                    {
+                        type = type + 1;
+                    }
+                    else
+                    {
+                        type = 0;
+                    }
+                    switch (type)
+                    {
+                    case 0:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setFmType(0);
+                        }
+                        break;
+                    case 1:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setFmType(1);
+                        }
+                        break;
+                    case 2:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setFmType(2);
+                        }
+                        break;
+                    case 3:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setFmType(3);
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+                }
+
+                break;
             case (18):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
@@ -164,7 +209,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minModulation = 0.0f;
-                    double maxModulation = 100.0f;
+                    double maxModulation = 1000.0f;
 
                     // Calculate the scaled frequency
                     double scaledModulation = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
