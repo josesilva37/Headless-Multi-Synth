@@ -58,9 +58,12 @@ public:
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     int type = voice->getOscillator().getType();
-                    if(type != 2){
-                        type = type +1;
-                    }else{
+                    if (type != 3)
+                    {
+                        type = type + 1;
+                    }
+                    else
+                    {
                         type = 0;
                     }
                     switch (type)
@@ -81,6 +84,12 @@ public:
                         if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                         {
                             voice->getOscillator().setType(2);
+                        }
+                        break;
+                    case 3:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getOscillator().setType(3);
                         }
                         break;
 
@@ -139,11 +148,11 @@ public:
                     int maxControllerValue = 127;
 
                     double minFrequency = 0.0f;
-                    double maxFrequency = 1000.0f;
+                    double maxFrequency = 600.0f;
 
                     // Calculate the scaled frequency
                     double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
-                    juce::Logger::writeToLog("Entrei no changeFmFreq: " + juce::String(scaledFrequency) );
+                    juce::Logger::writeToLog("Entrei no changeFmFreq: " + juce::String(scaledFrequency));
 
                     voice->changeFmFreq(scaledFrequency);
                 }

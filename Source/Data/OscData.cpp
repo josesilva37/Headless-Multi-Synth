@@ -39,6 +39,12 @@ void OscData::setType(const int oscSelection)
         initialise([](float x)
                    { return x < 0.0f ? -1.0f : 1.0f; });
         break;
+    //Triangle
+    case 3:
+        type = 3;
+        initialise([](float x)
+                   {   return 2.0f * fabs(2.0f * (x / juce::MathConstants<float>::pi - floor(x / juce::MathConstants<float>::pi + 0.5f))) - 1.0f; });
+        break;
 
     default:
         jassertfalse;
