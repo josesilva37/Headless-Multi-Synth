@@ -76,7 +76,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     osc.prepareToPlay(spec);
     osc.setType(0);
     gain.prepare(spec);
-    gain.setGainLinear(0.5f);
+    gain.setGainLinear(0.1f);
 };
 
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)

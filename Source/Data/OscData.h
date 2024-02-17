@@ -18,6 +18,8 @@ public:
   void prepareToPlay ( juce::dsp::ProcessSpec spec);
   void setType(const int oscSelection);
   int getType();
+  void setFmType(const int fmSelection);
+  int getFmType();
   void setGain(const float levelInDecibels);
   float getGain();
   bool isGainSet();
@@ -33,4 +35,5 @@ private:
   juce::dsp::Gain<float> gain;
   bool wasGainSet;
   int type;
+  int fmType;
 };

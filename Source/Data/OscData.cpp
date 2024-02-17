@@ -39,14 +39,60 @@ void OscData::setType(const int oscSelection)
         initialise([](float x)
                    { return x < 0.0f ? -1.0f : 1.0f; });
         break;
+    // Triangle
+    case 3:
+        type = 3;
+        initialise([](float x)
+                   { return 2.0f * fabs(2.0f * (x / juce::MathConstants<float>::pi - floor(x / juce::MathConstants<float>::pi + 0.5f))) - 1.0f; });
+        break;
 
     default:
         jassertfalse;
         break;
     }
 }
-int OscData::getType(){
+int OscData::getType()
+{
     return type;
+}
+void OscData::setFmType(const int oscSelection)
+{
+    switch (oscSelection)
+    {
+    // Sine
+    case 0:
+        fmType = 0;
+        fmOsc.initialise([](float x)
+                   { return std::sin(x); });
+        break;
+
+    // Saw
+    case 1:
+        fmType = 1;
+        fmOsc.initialise([](float x)
+                   { return x / juce::MathConstants<float>::pi; });
+        break;
+
+    // Square
+    case 2:
+        fmType = 2;
+        fmOsc.initialise([](float x)
+                   { return x < 0.0f ? -1.0f : 1.0f; });
+        break;
+    // Triangle
+    case 3:
+        fmType = 3;
+        fmOsc.initialise([](float x)
+                   { return 2.0f * fabs(2.0f * (x / juce::MathConstants<float>::pi - floor(x / juce::MathConstants<float>::pi + 0.5f))) - 1.0f; });
+        break;
+
+    default:
+        jassertfalse;
+        break;
+    }
+}
+int OscData::getFmType(){
+    return fmType;
 }
 void OscData::setGain(const float levelInDecibels)
 {
@@ -75,6 +121,8 @@ void OscData::setFmFreq(const float freq)
 
 void OscData::setWaveFrequency(const int midiNoteNumber)
 {
+    juce::Logger::writeToLog(juce::String(fmMod));
+
     setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber) + fmMod);
     lastMidiNote = midiNoteNumber;
 }

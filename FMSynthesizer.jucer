@@ -5,6 +5,8 @@
   <MAINGROUP id="SunBMb" name="FMSynthesizer">
     <GROUP id="{21A00855-B8C9-C7F5-780F-C0EA3A28F67E}" name="Source">
       <GROUP id="{40A42BD6-089F-2377-2EDD-E8207F458156}" name="Data">
+        <FILE id="SdodFu" name="FilterData.cpp" compile="1" resource="0" file="Source/Data/FilterData.cpp"/>
+        <FILE id="ss7wQH" name="FilterData.h" compile="0" resource="0" file="Source/Data/FilterData.h"/>
         <FILE id="h2hQ41" name="OscData.cpp" compile="1" resource="0" file="Source/Data/OscData.cpp"/>
         <FILE id="LAOG9W" name="OscData.h" compile="0" resource="0" file="Source/Data/OscData.h"/>
       </GROUP>
