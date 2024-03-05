@@ -44,6 +44,17 @@ void SynthVoice::changeRelease(float releaseValue)
     parameters.release = releaseValue/100;
     adsr.setParameters(parameters);
 };
+void SynthVoice::changeFilterType(int type){
+    filter.selectFilterType(type);
+}
+void SynthVoice::changeFilterCutOffFreq(float cutofffreq){
+    filter.setCutoffFrequency(cutofffreq);
+}
+
+void SynthVoice::changeFilterResonance(float resonsance){
+    filter.setResonance(resonsance);
+}
+
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
     osc.setWaveFrequency(midiNoteNumber);
@@ -75,6 +86,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     
     osc.prepareToPlay(spec);
     osc.setType(0);
+    filter.prepareToPlay(spec);
     gain.prepare(spec);
     gain.setGainLinear(0.1f);
 };
@@ -89,12 +101,8 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     {
         gain.setGainLinear(osc.getGain());
     }
-    // juce::Logger::writeToLog("Attack: " + juce::String(adsr.getParameters().attack));
-    // juce::Logger::writeToLog("Decay: " + juce::String(adsr.getParameters().decay));
-    // juce::Logger::writeToLog("Sustain: " + juce::String(adsr.getParameters().sustain));
-    // juce::Logger::writeToLog("Release: " + juce::String(adsr.getParameters().release));
-
-    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-
+    
+    filter.processNextBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
+    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 };

@@ -3,6 +3,7 @@
 #include <JuceHeader.h>
 #include "SynthSound.h"
 #include "Data/OscData.h"
+#include "Data/FilterData.h"
 
 class SynthVoice : public juce::SynthesiserVoice
 {
@@ -20,6 +21,10 @@ public:
     void changeRelease(float releaseValue);
     void changeFmDepth(float depth);
     void changeFmFreq(float freq);
+    void changeFilterCutOffFreq(float freq);
+    void changeFilterType(int type);
+    void changeFilterResonance(float resonance);
+    FilterData& getFilter() {return filter;};
     OscData& getOscillator() {return osc;};
 private:
 
@@ -27,4 +32,5 @@ private:
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
+    FilterData filter;
 };

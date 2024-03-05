@@ -24,16 +24,20 @@ void FilterData::selectFilterType(int type){
     case 0:
         setType(juce::dsp::StateVariableTPTFilterType::lowpass);
         filterType = 0;
+        break;
     case 1:
         setType(juce::dsp::StateVariableTPTFilterType::bandpass);
         filterType = 1;
-
+        break;
     case 2:
         setType(juce::dsp::StateVariableTPTFilterType::highpass);
         filterType = 2;
+        break;
     }
 }
-
+int FilterData::getFilterType(){
+    return filterType;
+}
 void FilterData::processNextBlock(juce::AudioBuffer<float>& buffer){
     juce::dsp::AudioBlock<float> block {buffer};
     process(juce::dsp::ProcessContextReplacing<float>(block));

@@ -10,6 +10,7 @@ class FilterData : public juce::dsp::StateVariableTPTFilter<float>
         void prepareToPlay(juce::dsp::ProcessSpec spec);
         void processNextBlock(juce::AudioBuffer<float>& buffer);
         void selectFilterType(int filterType);
+        int getFilterType();
     private:
      int filterType = 0;
 };

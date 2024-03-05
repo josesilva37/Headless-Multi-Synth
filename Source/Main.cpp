@@ -218,6 +218,78 @@ public:
                     voice->changeFmDepth(scaledModulation);
                 }
                 break;
+            case (25):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+
+                    int type = voice->getFilter().getFilterType();
+                    juce::Logger::writeToLog(juce::String(type));
+
+                    if (type != 2)
+                    {
+                        type = type + 1;
+                    }
+                    else
+                    {
+                        type= 0;
+                    }
+                    juce::Logger::writeToLog(juce::String(type));
+
+                    switch (type)
+                    {
+                    case 0:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getFilter().selectFilterType(0);
+                        }
+                        break;
+                    case 1:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getFilter().selectFilterType(1);
+                        }
+                        break;
+                    case 2:
+                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        {
+                            voice->getFilter().selectFilterType(2);
+                        }
+                        break;
+
+                    default:
+                        break;
+                    }
+                }
+                break;
+            case (26):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minModulation = 20.0f;
+                    double maxModulation = 2000.0f;
+
+                    double scaledFrequency = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->getFilter().setCutoffFrequency(scaledFrequency);
+                }
+                break;
+            case (27):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minModulation = 0.0f;
+                    double maxModulation = 0.95f;
+
+                    double scaledResonance = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    
+
+                    voice->getFilter().setResonance(scaledResonance);
+                }
+                break;
 
             default:
                 break;

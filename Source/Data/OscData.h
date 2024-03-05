@@ -29,8 +29,10 @@ public:
   void setFmDepth(const float depth);
 private:
   juce::dsp::Oscillator<float> fmOsc { [](float x) { return std::sin (x); }};
+  juce::dsp::Oscillator<float> lfo { [](float x) { return std::sin (x); }};
   float fmMod {5.0f};
   float fmDepth {0};
+  float lfoMod;
   int lastMidiNote {0};
   juce::dsp::Gain<float> gain;
   bool wasGainSet;

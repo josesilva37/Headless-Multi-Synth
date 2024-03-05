@@ -12,8 +12,10 @@
 
 void OscData::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
+    lfo.prepare(spec);
     fmOsc.prepare(spec);
     prepare(spec);
+    lfo.setFrequency(20.0f);
 }
 void OscData::setType(const int oscSelection)
 {
@@ -123,7 +125,7 @@ void OscData::setWaveFrequency(const int midiNoteNumber)
 {
     juce::Logger::writeToLog(juce::String(fmMod));
 
-    setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber) + fmMod);
+    setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber) + fmMod * lfoMod);
     lastMidiNote = midiNoteNumber;
 }
 void OscData::getNextAudioBlock(juce::dsp::AudioBlock<float> &block)
@@ -133,8 +135,10 @@ void OscData::getNextAudioBlock(juce::dsp::AudioBlock<float> &block)
         for (int s = 0; s < block.getNumSamples(); ++s)
         {
             fmMod = fmOsc.processSample(block.getSample(ch, s)) * fmDepth;
+            lfoMod = lfo.processSample(block.getSample(ch, s)) *100;
         }
     }
+
     // juce::Logger::writeToLog(juce::String(fmOsc.getFrequency()) + "  -  " + juce::String(fmDepth));
 
     process(juce::dsp::ProcessContextReplacing<float>(block));
