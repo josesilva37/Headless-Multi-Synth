@@ -318,4 +318,4 @@ build/intermediate/Debug/Main_90ebc5c2.o: ../../Source/Main.cpp \
  ../../JuceLibraryCode/modules/juce_dsp/widgets/juce_Phaser.h \
  ../../JuceLibraryCode/modules/juce_dsp/widgets/juce_Chorus.h \
  ../../Source/SynthVoice.h ../../Source/SynthSound.h \
- ../../Source/Data/OscData.h
+ ../../Source/Data/OscData.h ../../Source/Data/FilterData.h

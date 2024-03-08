@@ -57,44 +57,47 @@ public:
             case (113):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    int type = voice->getOscillator().getType();
-                    if (type != 3)
+                    if (controllerValue == 127)
                     {
-                        type = type + 1;
-                    }
-                    else
-                    {
-                        type = 0;
-                    }
-                    switch (type)
-                    {
-                    case 0:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        int type = voice->getOscillator().getType();
+                        if (type != 3)
                         {
-                            voice->getOscillator().setType(0);
+                            type = type + 1;
                         }
-                        break;
-                    case 1:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        else
                         {
-                            voice->getOscillator().setType(1);
+                            type = 0;
                         }
-                        break;
-                    case 2:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        switch (type)
                         {
-                            voice->getOscillator().setType(2);
-                        }
-                        break;
-                    case 3:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getOscillator().setType(3);
-                        }
-                        break;
+                        case 0:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setType(0);
+                            }
+                            break;
+                        case 1:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setType(1);
+                            }
+                            break;
+                        case 2:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setType(2);
+                            }
+                            break;
+                        case 3:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setType(3);
+                            }
+                            break;
 
-                    default:
-                        break;
+                        default:
+                            break;
+                        }
                     }
                 }
 
@@ -102,44 +105,48 @@ public:
             case (115):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    int type = voice->getOscillator().getFmType();
-                    if (type != 3)
+                    if (controllerValue == 127)
                     {
-                        type = type + 1;
-                    }
-                    else
-                    {
-                        type = 0;
-                    }
-                    switch (type)
-                    {
-                    case 0:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getOscillator().setFmType(0);
-                        }
-                        break;
-                    case 1:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getOscillator().setFmType(1);
-                        }
-                        break;
-                    case 2:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getOscillator().setFmType(2);
-                        }
-                        break;
-                    case 3:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getOscillator().setFmType(3);
-                        }
-                        break;
 
-                    default:
-                        break;
+                        int type = voice->getOscillator().getFmType();
+                        if (type != 3)
+                        {
+                            type = type + 1;
+                        }
+                        else
+                        {
+                            type = 0;
+                        }
+                        switch (type)
+                        {
+                        case 0:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setFmType(0);
+                            }
+                            break;
+                        case 1:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setFmType(1);
+                            }
+                            break;
+                        case 2:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setFmType(2);
+                            }
+                            break;
+                        case 3:
+                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            {
+                                voice->getOscillator().setFmType(3);
+                            }
+                            break;
+
+                        default:
+                            break;
+                        }
                     }
                 }
 
@@ -218,7 +225,7 @@ public:
                     voice->changeFmDepth(scaledModulation);
                 }
                 break;
-            case (25):
+            case (22):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
 
@@ -231,7 +238,7 @@ public:
                     }
                     else
                     {
-                        type= 0;
+                        type = 0;
                     }
                     juce::Logger::writeToLog(juce::String(type));
 
@@ -261,36 +268,62 @@ public:
                     }
                 }
                 break;
-            case (26):
+            case (73):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     int minControllerValue = 0;
                     int maxControllerValue = 127;
 
                     double minModulation = 20.0f;
-                    double maxModulation = 2000.0f;
+                    double maxModulation = 1000.0f;
 
                     double scaledFrequency = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
 
                     voice->getFilter().setCutoffFrequency(scaledFrequency);
                 }
                 break;
-            case (27):
+            case (75):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minModulation = 0.05f;
+                    double maxModulation = 0.95f;
+
+                    double scaledResonance = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->getFilter().setResonance(scaledResonance);
+                }
+                break;
+            case (17):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minModulation = 0.5f;
+                    double maxModulation = 20.0f;
+
+                    double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->getOscillator().setLFOFreq(scaledValue);
+                }
+                break;
+            case (91):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     int minControllerValue = 0;
                     int maxControllerValue = 127;
 
                     double minModulation = 0.0f;
-                    double maxModulation = 0.95f;
+                    double maxModulation = 100.0f;
 
-                    double scaledResonance = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
-                    
+                    double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
 
-                    voice->getFilter().setResonance(scaledResonance);
+                    voice->getOscillator().setLFODepth(scaledValue);
                 }
                 break;
-
             default:
                 break;
             }
