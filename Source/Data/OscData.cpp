@@ -149,12 +149,7 @@ void OscData::getNextAudioBlock(juce::dsp::AudioBlock<float> &block)
     }
    
     float currentFreq = lastFreq + fmMod + lfoMod;
-    // juce::Logger::writeToLog("LFO");
 
-    // juce::Logger::writeToLog(juce::String(lfoMod));
-    // juce::Logger::writeToLog("Total");
-
-    // juce::Logger::writeToLog(juce::String(currentFreq));
     if(currentFreq <0){
         currentFreq = -currentFreq;
     }

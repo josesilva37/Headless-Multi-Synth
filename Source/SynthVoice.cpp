@@ -43,7 +43,7 @@ void SynthVoice::changeFilterType(int type){
     filter.selectFilterType(type);
 }
 void SynthVoice::changeFilterCutOffFreq(float cutofffreq){
-    filter.setCutoffFrequency(cutofffreq);
+    filter.setFilterCutOffFrequency(cutofffreq);
 }
 
 void SynthVoice::changeFilterResonance(float resonsance){
@@ -88,10 +88,9 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
     osc.getNextAudioBlock(audioBlock);
 
-    float lfoValue = lfo.processSample(0); // Assuming LFO is mono
+    float lfoValue = lfo.processSample(0);
     float lfoMod = (lfoValue * lfoDepth)/100;
 
-    juce::Logger::writeToLog(juce::String(lfoMod) + "-LFO -Gain " + juce::String(osc.getGain()));
 
     float finalGain = osc.getGain(); 
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
@@ -99,7 +98,6 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         finalGain += lfoMod; 
     }
 
-    juce::Logger::writeToLog(juce::String(finalGain));
     gain.setGainLinear(finalGain);
 
     

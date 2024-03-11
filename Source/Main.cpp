@@ -287,7 +287,7 @@ public:
 
                     double scaledFrequency = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
 
-                    voice->getFilter().setCutoffFrequency(scaledFrequency);
+                    voice->getFilter().setFilterCutOffFrequency(scaledFrequency);
                 }
                 break;
             case (75):
