@@ -25,11 +25,6 @@ void SynthVoice::changeDecay(float decayValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
     parameters.decay = decayValue/100;
-    juce::Logger::writeToLog("ADSR Parameters: ");
-    juce::Logger::writeToLog("Attack: " + juce::String(parameters.attack));
-    juce::Logger::writeToLog("Decay: " + juce::String(parameters.decay));
-    juce::Logger::writeToLog("Sustain: " + juce::String(parameters.release));
-    juce::Logger::writeToLog("Release: " + juce::String(parameters.sustain));
     adsr.setParameters(parameters);
 };
 void SynthVoice::changeSustain(float sustainValue)
@@ -58,11 +53,6 @@ void SynthVoice::changeFilterResonance(float resonsance){
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
     osc.setWaveFrequency(midiNoteNumber);
-    juce::Logger::writeToLog("ADSR Parameters: ");
-    juce::Logger::writeToLog("Attack: " + juce::String(adsr.getParameters().attack));
-    juce::Logger::writeToLog("Decay: " + juce::String(adsr.getParameters().decay));
-    juce::Logger::writeToLog("Sustain: " + juce::String(adsr.getParameters().sustain));
-    juce::Logger::writeToLog("Release: " + juce::String(adsr.getParameters().release));
     adsr.noteOn();
 };
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
@@ -84,6 +74,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.sampleRate = sampleRate;
     spec.numChannels = outputChannels;
     
+    lfo.prepare(spec);
+    lfo.setFrequency(20.0f);
     osc.prepareToPlay(spec);
     osc.setType(0);
     filter.prepareToPlay(spec);
@@ -95,12 +87,21 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
     osc.getNextAudioBlock(audioBlock);
-    // juce::Logger::writeToLog(juce::String(gain.getGainDecibels()));
-    
-    if (osc.isGainSet())
+
+    float lfoValue = lfo.processSample(0); // Assuming LFO is mono
+    float lfoMod = (lfoValue * lfoDepth)/100;
+
+    juce::Logger::writeToLog(juce::String(lfoMod) + "-LFO -Gain " + juce::String(osc.getGain()));
+
+    float finalGain = osc.getGain(); 
+    if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
-        gain.setGainLinear(osc.getGain());
+        finalGain += lfoMod; 
     }
+
+    juce::Logger::writeToLog(juce::String(finalGain));
+    gain.setGainLinear(finalGain);
+
     
     filter.processNextBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());

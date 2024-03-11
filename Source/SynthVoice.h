@@ -33,4 +33,8 @@ private:
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
     FilterData filter;
+    juce::dsp::Oscillator<float> lfo { [](float x) { return std::sin (x); }};
+    float lfoMod;
+    float lfoDepth= 10.0f;
+
 };

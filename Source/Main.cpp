@@ -154,7 +154,15 @@ public:
             case (18):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    voice->getOscillator().setGain(controllerValue);
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minModulation = 0.0f;
+                    double maxModulation = 1.0f;
+
+                    // Calculate the scaled frequency
+                    double scaledGain = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    voice->getOscillator().setGain(scaledGain);
                 }
                 break;
 

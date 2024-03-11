@@ -15,7 +15,7 @@ void OscData::prepareToPlay(juce::dsp::ProcessSpec spec)
     lfo.prepare(spec);
     fmOsc.prepare(spec);
     prepare(spec);
-    lfo.setFrequency(5.0f);
+    lfo.setFrequency(0.0f);
 }
 void OscData::setType(const int oscSelection)
 {
@@ -97,9 +97,9 @@ int OscData::getFmType()
 {
     return fmType;
 }
-void OscData::setGain(const float levelInDecibels)
+void OscData::setGain(const float gainLinear)
 {
-    gain.setGainLinear(levelInDecibels / 100);
+    gain.setGainLinear(gainLinear);
     wasGainSet = true;
 }
 float OscData::getGain()
