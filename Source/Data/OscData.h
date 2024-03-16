@@ -23,7 +23,7 @@ public:
   void setGain(const float levelInDecibels);
   float getGain();
   bool isGainSet();
-  void getNextAudioBlock(juce::dsp::AudioBlock<float>& block);
+  void getNextAudioBlock(juce::AudioBuffer<float> &buffer);
   void setWaveFrequency(const int midiNoteNumber);
   void setFmFreq(const float freq);
   void setFmDepth(const float depth);
@@ -32,6 +32,7 @@ public:
   void setLFOToPitch(const bool state);
 private:
   juce::dsp::Oscillator<float> fmOsc { [](float x) { return std::sin (x); }};
+  juce::dsp::Oscillator<float> carrier { [](float x) { return std::sin (x); }};
   juce::dsp::Oscillator<float> lfo { [](float x) { return std::sin (x); }};
   float fmMod {5.0f};
   float fmDepth {0};

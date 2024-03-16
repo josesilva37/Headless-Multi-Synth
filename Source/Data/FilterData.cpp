@@ -51,8 +51,7 @@ void FilterData::processNextBlock(juce::AudioBuffer<float> &buffer)
     juce::dsp::AudioBlock<float> block{buffer};
     float lfoValue = lfo.processSample(0);
     float lfoMod = (lfoValue * lfoDepth) ;
-    juce::Logger::writeToLog(juce::String(lfoMod));
-    juce::Logger::writeToLog(juce::String(getCutoffFrequency()));
+
     if (frequencyValue + lfoMod > 0 &&  frequencyValue + lfoMod < 20000)
     {
         setCutoffFrequency(frequencyValue + lfoMod);

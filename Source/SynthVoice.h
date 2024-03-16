@@ -24,17 +24,18 @@ public:
     void changeFilterCutOffFreq(float freq);
     void changeFilterType(int type);
     void changeFilterResonance(float resonance);
-    FilterData& getFilter() {return filter;};
-    OscData& getOscillator() {return osc;};
-private:
+    FilterData &getFilter() { return filter; };
+    OscData &getOscillator() { return osc; };
 
+private:
     OscData osc;
+    juce::AudioBuffer<float> synthBuffer;
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
     FilterData filter;
-    juce::dsp::Oscillator<float> lfo { [](float x) { return std::sin (x); }};
+    juce::dsp::Oscillator<float> lfo{[](float x)
+                                     { return std::sin(x); }};
     float lfoMod;
-    float lfoDepth= 10.0f;
-
+    float lfoDepth = 0.0f;
 };

@@ -14,6 +14,7 @@ void OscData::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     lfo.prepare(spec);
     fmOsc.prepare(spec);
+    carrier.prepare(spec);
     prepare(spec);
     lfo.setFrequency(0.0f);
 }
@@ -134,25 +135,34 @@ void OscData::setWaveFrequency(const int midiNoteNumber)
     juce::Logger::writeToLog(juce::String(lfoMod));
 
     setFrequency((juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)));
+    carrier.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
     lastMidiNote = midiNoteNumber;
     lastFreq = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
 }
-void OscData::getNextAudioBlock(juce::dsp::AudioBlock<float> &block)
+void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
 {
+    juce::dsp::AudioBlock<float> block{buffer};
+
     for (int ch = 0; ch < block.getNumChannels(); ++ch)
     {
         for (int s = 0; s < block.getNumSamples(); ++s)
         {
             fmMod = fmOsc.processSample(block.getSample(ch, s)) * fmDepth;
             lfoMod = lfo.processSample(block.getSample(ch, s)) * lfoDepth;
+            // use more fmmod and different algorthyms by changin the formula+
+            float currentFreq = lastFreq + fmMod + lfoMod;
+            float currentFreq2 = lastFreq + fmMod + lfoMod;
+
+            if (currentFreq < 0)
+                currentFreq = -currentFreq;
+            if (currentFreq2 < 0)
+                currentFreq2 = -currentFreq2;
+
+            setFrequency(currentFreq);
+            carrier.setFrequency(currentFreq2);
+
+            float outputSample = processSample(block.getSample(ch, s)) + carrier.processSample(block.getSample(ch, s));
+            block.setSample(ch, s, outputSample);
         }
     }
-   
-    float currentFreq = lastFreq + fmMod + lfoMod;
-
-    if(currentFreq <0){
-        currentFreq = -currentFreq;
-    }
-    setFrequency(currentFreq);
-    process(juce::dsp::ProcessContextReplacing<float>(block));
 }

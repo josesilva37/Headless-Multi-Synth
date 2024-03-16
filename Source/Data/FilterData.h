@@ -17,5 +17,5 @@ private:
     int filterType = 0;
     juce::dsp::Oscillator<float> lfo{[](float x){ return std::sin(x); }};
     float lfoMod;
-    float lfoDepth = 5.0f;
+    float lfoDepth = 0.0f;
 };

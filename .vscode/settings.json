@@ -1,5 +1,9 @@
 {
     "files.associations": {
-        "*.mm": "cpp"
+        "*.mm": "cpp",
+        "memory": "cpp",
+        "future": "cpp",
+        "istream": "cpp",
+        "functional": "cpp"
     }
 }

@@ -17,36 +17,39 @@ void SynthVoice::changeAttack(float attackValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
 
-    parameters.attack = attackValue/100;
-    
+    parameters.attack = attackValue / 100;
+
     adsr.setParameters(parameters);
 };
 void SynthVoice::changeDecay(float decayValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
-    parameters.decay = decayValue/100;
+    parameters.decay = decayValue / 100;
     adsr.setParameters(parameters);
 };
 void SynthVoice::changeSustain(float sustainValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
-    parameters.sustain = sustainValue/100;
+    parameters.sustain = sustainValue / 100;
     adsr.setParameters(parameters);
 };
 void SynthVoice::changeRelease(float releaseValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
-    parameters.release = releaseValue/100;
+    parameters.release = releaseValue / 100;
     adsr.setParameters(parameters);
 };
-void SynthVoice::changeFilterType(int type){
+void SynthVoice::changeFilterType(int type)
+{
     filter.selectFilterType(type);
 }
-void SynthVoice::changeFilterCutOffFreq(float cutofffreq){
+void SynthVoice::changeFilterCutOffFreq(float cutofffreq)
+{
     filter.setFilterCutOffFrequency(cutofffreq);
 }
 
-void SynthVoice::changeFilterResonance(float resonsance){
+void SynthVoice::changeFilterResonance(float resonsance)
+{
     filter.setResonance(resonsance);
 }
 
@@ -73,7 +76,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = outputChannels;
-    
+
     lfo.prepare(spec);
     lfo.setFrequency(20.0f);
     osc.prepareToPlay(spec);
@@ -86,21 +89,20 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
-    osc.getNextAudioBlock(audioBlock);
+
+    osc.getNextAudioBlock(outputBuffer);
 
     float lfoValue = lfo.processSample(0);
-    float lfoMod = (lfoValue * lfoDepth)/100;
+    float lfoMod = (lfoValue * lfoDepth) / 100;
 
-
-    float finalGain = osc.getGain(); 
+    float finalGain = osc.getGain();
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
-        finalGain += lfoMod; 
+        finalGain += lfoMod;
     }
 
     gain.setGainLinear(finalGain);
 
-    
     filter.processNextBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
