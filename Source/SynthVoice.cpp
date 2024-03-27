@@ -74,17 +74,22 @@ void SynthVoice::pitchWheelMoved(int newPitchWheelValue)
 void SynthVoice::setReverbWetLevel(float level)
 {
 
-    if(level == 0){
+    if (level == 0)
+    {
         reverb.setEnabled(false);
-       }else{
+    }
+    else
+    {
         reverb.setEnabled(true);
-       }
-    
+    }
+
     reverbParams.wetLevel = level;
     reverbParams.width = level;
+};
 
-    
-}
+void SynthVoice::setDelay(float delayLevel){
+    delay.setDelay(delayLevel);
+};
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
 
@@ -103,6 +108,9 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     gain.setGainLinear(0.1f);
     reverb.prepare(spec);
     reverb.setEnabled(false);
+    delay.prepare(spec);
+    limiter.prepare(spec);
+    limiter.setThreshold(0.5f);
 };
 
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
@@ -129,5 +137,10 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         reverb.setParameters(reverbParams);
         reverb.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     }
+    if (enableDelay)
+    {
+        delay.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    }
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 };

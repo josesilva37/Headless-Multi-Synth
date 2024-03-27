@@ -227,7 +227,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minFrequency = 0.0f;
-                    double maxFrequency = 600.0f;
+                    double maxFrequency = 1000.0f;
 
                     // Calculate the scaled frequency
                     double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
@@ -243,7 +243,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minModulation = 0.0f;
-                    double maxModulation = 1000.0f;
+                    double maxModulation = 10000.0f;
 
                     // Calculate the scaled frequency
                     double scaledModulation = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
