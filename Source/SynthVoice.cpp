@@ -87,8 +87,20 @@ void SynthVoice::setReverbWetLevel(float level)
     reverbParams.width = level;
 };
 
-void SynthVoice::setDelay(float delayLevel){
-    delay.setDelay(delayLevel);
+void SynthVoice::setDelay(float delayLevel, float feedback)
+{
+    if (delayLevel == 0)
+    {
+        enableDelay = false;
+        delay.setDelay(0);
+    }
+    else
+    {
+        enableDelay = true;
+        delayFeedback = feedback;
+        delaySize = delayLevel;
+        delay.setDelay(delayLevel);
+    }
 };
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
@@ -109,6 +121,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     reverb.prepare(spec);
     reverb.setEnabled(false);
     delay.prepare(spec);
+    delay.setMaximumDelayInSamples(44100 * 4);
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
 };
@@ -139,7 +152,25 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     }
     if (enableDelay)
     {
+        // float currentDelayTime = delay.getDelay();
+        // float targetDelayTime = delaySize;
+        // float delayToIncrease = delaySize - delay.getDelay() / numSamples;
+        // juce::Logger::writeToLog(juce::String(delay.getDelay()));
         delay.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+        float feedbackAttenuation = 0.5f;
+        for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
+        {
+            auto *channelData = outputBuffer.getWritePointer(channel);
+            auto *delayData = audioBlock.getChannelPointer(channel);
+
+            for (int sample = 0; sample < numSamples; ++sample)
+            {
+                // Mix delayed signal back into the input with feedback gain
+                channelData[sample] += delayData[sample] * delayFeedback;
+
+                delayFeedback *= feedbackAttenuation;
+            }
+        }
     }
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));

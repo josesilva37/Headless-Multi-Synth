@@ -25,7 +25,7 @@ public:
     void changeFilterType(int type);
     void changeFilterResonance(float resonance);
     void setReverbWetLevel(float level);
-    void setDelay(float delay);
+    void setDelay(float delay, float feedback);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
 
@@ -45,5 +45,7 @@ private:
     juce::dsp::DelayLine<float,juce::dsp::DelayLineInterpolationTypes::Linear> delay;
     bool enableDelay = false;
     juce::dsp::Limiter<float> limiter;
+    float delayFeedback;
+    float delaySize;
 
 };
