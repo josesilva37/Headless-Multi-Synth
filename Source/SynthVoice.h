@@ -24,6 +24,7 @@ public:
     void changeFilterCutOffFreq(float freq);
     void changeFilterType(int type);
     void changeFilterResonance(float resonance);
+    void setReverbWetLevel(float level);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
 
@@ -38,4 +39,8 @@ private:
                                      { return std::sin(x); }};
     float lfoMod;
     float lfoDepth = 0.0f;
+    juce::dsp::Reverb reverb;
+    juce::dsp::Reverb::Parameters reverbParams;
+
+
 };

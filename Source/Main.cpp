@@ -171,7 +171,20 @@ public:
                     voice->getOscillator().setGain(scaledGain);
                 }
                 break;
+            case (74):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
 
+                    double minLevel = 0.0f;
+                    double maxLevel = 1.0f;
+
+                    double scaledLevel = minLevel + (maxLevel - minLevel) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->setReverbWetLevel(scaledLevel);
+                }
+                break;
             case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {

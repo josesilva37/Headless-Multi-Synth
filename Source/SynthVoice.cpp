@@ -65,10 +65,26 @@ void SynthVoice::stopNote(float velocity, bool allowTailOff)
 void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue){
 
 };
-void SynthVoice::pitchWheelMoved(int newPitchWheelValue){
+void SynthVoice::pitchWheelMoved(int newPitchWheelValue)
+{
 
     osc.setPitchBend(newPitchWheelValue);
 };
+
+void SynthVoice::setReverbWetLevel(float level)
+{
+
+    if(level == 0){
+        reverb.setEnabled(false);
+       }else{
+        reverb.setEnabled(true);
+       }
+    
+    reverbParams.wetLevel = level;
+    reverbParams.width = level;
+
+    
+}
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
 
@@ -85,6 +101,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     filter.prepareToPlay(spec);
     gain.prepare(spec);
     gain.setGainLinear(0.1f);
+    reverb.prepare(spec);
+    reverb.setEnabled(false);
 };
 
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
@@ -106,5 +124,10 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     filter.processNextBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
+    if (reverb.isEnabled())
+    {
+        reverb.setParameters(reverbParams);
+        reverb.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    }
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 };
