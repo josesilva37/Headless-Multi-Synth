@@ -67,6 +67,7 @@ void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue){
 };
 void SynthVoice::pitchWheelMoved(int newPitchWheelValue){
 
+    osc.setPitchBend(newPitchWheelValue);
 };
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {

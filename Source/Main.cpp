@@ -24,7 +24,13 @@ public:
     {
         // Handle incoming MIDI message
         juce::Logger::writeToLog("Received MIDI message: " + message.getDescription());
-
+        if (message.isPitchWheel())
+        {
+            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+            {
+                voice->pitchWheelMoved(message.getPitchWheelValue());
+            }
+        }
         if (message.isNoteOn())
         {
             int noteNumber = message.getNoteNumber();

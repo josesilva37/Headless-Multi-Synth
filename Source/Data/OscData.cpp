@@ -139,6 +139,32 @@ void OscData::setWaveFrequency(const int midiNoteNumber)
     lastMidiNote = midiNoteNumber;
     lastFreq = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
 }
+void OscData::setPitchBend(float pitchBendValue)
+{
+    if (pitchBendValue != 8192)
+    {
+        pitchBend = true;
+    }
+    else
+    {
+        pitchBend = false;
+    }
+    juce::Logger::writeToLog("pitch " + juce::String(pitchBendValue));
+
+    double bendRange = 12.0;                 // 2 semitones
+    double bendFactor = bendRange / 8192.0; // 8192 is the center value of the pitch bend range
+
+    // Convert raw pitch bend value to a bend factor ranging from -1.0 to 1.0
+    double normalizedBend = (static_cast<double>(pitchBendValue) / 8192.0) - 1.0;
+
+    // Calculate the amount of pitch bend in semitones
+    double bendInSemitones = normalizedBend * bendRange;
+
+    // Apply pitch bend to the currently playing note
+    double pitchBendFrequencyMultiplier = std::pow(2.0, bendInSemitones / 12.0);
+    pitchBendFreq = lastFreq * pitchBendFrequencyMultiplier;
+    juce::Logger::writeToLog("freq " + juce::String(pitchBendFreq));
+}
 void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
@@ -150,19 +176,39 @@ void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
             fmMod = fmOsc.processSample(block.getSample(ch, s)) * fmDepth;
             lfoMod = lfo.processSample(block.getSample(ch, s)) * lfoDepth;
             // use more fmmod and different algorthyms by changin the formula+
-            float currentFreq = lastFreq + fmMod + lfoMod;
-            float currentFreq2 = lastFreq + fmMod + lfoMod;
 
-            if (currentFreq < 0)
-                currentFreq = -currentFreq;
-            if (currentFreq2 < 0)
-                currentFreq2 = -currentFreq2;
-
-            setFrequency(currentFreq);
-            carrier.setFrequency(currentFreq2);
-
-            float outputSample = processSample(block.getSample(ch, s)) + carrier.processSample(block.getSample(ch, s));
-            block.setSample(ch, s, outputSample);
+            // float outputSample = processSample(block.getSample(ch, s)) + carrier.processSample(block.getSample(ch, s));
+            //  processSample(block.getSample(ch, s));
+            // block.setSample(ch, s, outputSample);
         }
     }
+
+    if (pitchBend)
+    {
+        juce::Logger::writeToLog("Ptich " + juce::String(pitchBendFreq));
+
+        float currentFreq = pitchBendFreq + fmMod + lfoMod;
+        float currentFreq2 = pitchBendFreq + fmMod + lfoMod;
+        if (currentFreq < 0)
+            currentFreq = -currentFreq;
+        if (currentFreq2 < 0)
+            currentFreq2 = -currentFreq2;
+        carrier.setFrequency(currentFreq2);
+            // juce::Logger::writeToLog("freq " + juce::String(currentFreq));
+
+        setFrequency(currentFreq);
+    }
+    else
+    {
+        float currentFreq = lastFreq + fmMod + lfoMod;
+        float currentFreq2 = lastFreq + fmMod + lfoMod;
+        if (currentFreq < 0)
+            currentFreq = -currentFreq;
+        if (currentFreq2 < 0)
+            currentFreq2 = -currentFreq2;
+        carrier.setFrequency(currentFreq2);
+        setFrequency(currentFreq);
+    }
+
+    process(juce::dsp::ProcessContextReplacing<float>(block));
 }

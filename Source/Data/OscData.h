@@ -30,6 +30,7 @@ public:
   void setLFOFreq(const float freq);
   void setLFODepth(const float res);
   void setLFOToPitch(const bool state);
+  void setPitchBend(float bend);
 private:
   juce::dsp::Oscillator<float> fmOsc { [](float x) { return std::sin (x); }};
   juce::dsp::Oscillator<float> carrier { [](float x) { return std::sin (x); }};
@@ -45,4 +46,6 @@ private:
   int type;
   int fmType;
   bool lfoToPitch = false;
+  bool pitchBend = false;
+  float pitchBendFreq;
 };
