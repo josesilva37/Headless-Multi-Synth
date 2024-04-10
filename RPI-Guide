@@ -1,0 +1,7 @@
+git clone https://github.com/josesilva37/Headless-Multi-Synth.git
+
+make clean
+make LDFLAGS=-latomic march=armv8-a
+
+sudo nano /home/pi/.bashrc
+

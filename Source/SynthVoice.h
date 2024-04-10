@@ -24,8 +24,14 @@ public:
     void changeFilterCutOffFreq(float freq);
     void changeFilterType(int type);
     void changeFilterResonance(float resonance);
+    void changeFilterLFODepth(float level);
+    void changeFilterLFOFreq(float level);
     void setReverbWetLevel(float level);
     void setDelay(float delay, float feedback);
+    void setLFOGainDepth(float level);
+    void setLFOGainFreq(float level);
+    int getLFOControl();
+    void setLFOControl(int type);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
 
@@ -47,5 +53,6 @@ private:
     juce::dsp::Limiter<float> limiter;
     float delayFeedback;
     float delaySize;
+    int LFOControl = 0;
 
 };

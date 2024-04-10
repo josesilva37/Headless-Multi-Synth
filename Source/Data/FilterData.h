@@ -12,6 +12,8 @@ public:
     void selectFilterType(int filterType);
     int getFilterType();
     void setFilterCutOffFrequency(float frequency);
+    void setLFOFreq (float level);
+    void setLFODepth(float level);
 private:
     float frequencyValue=1000;
     int filterType = 0;

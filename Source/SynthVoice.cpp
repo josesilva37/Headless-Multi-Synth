@@ -52,7 +52,24 @@ void SynthVoice::changeFilterResonance(float resonsance)
 {
     filter.setResonance(resonsance);
 }
-
+int SynthVoice::getLFOControl(){
+    return LFOControl;
+}
+void SynthVoice::setLFOControl(int type){
+    LFOControl = type;
+}
+void SynthVoice::setLFOGainDepth(float level){
+    lfoDepth = level;
+}
+void SynthVoice::setLFOGainFreq(float level){
+    lfo.setFrequency(level);
+}
+void SynthVoice::changeFilterLFODepth(float level){
+    filter.setLFODepth(level);
+}
+void SynthVoice::changeFilterLFOFreq(float level){
+    filter.setLFOFreq(level);
+}
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
     osc.setWaveFrequency(midiNoteNumber);

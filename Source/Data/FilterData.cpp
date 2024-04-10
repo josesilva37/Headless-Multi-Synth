@@ -23,7 +23,12 @@ void FilterData::setFilterCutOffFrequency(float freq){
     setCutoffFrequency(freq);
     frequencyValue = freq;
 }
-
+void FilterData::setLFODepth(float level){
+    lfoDepth = level;
+}
+void FilterData::setLFOFreq(float level){
+    lfo.setFrequency(level);
+}
 void FilterData::selectFilterType(int type)
 {
     switch (type)

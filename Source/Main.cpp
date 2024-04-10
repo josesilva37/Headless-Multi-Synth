@@ -49,13 +49,9 @@ public:
         }
         else if (message.isController())
         {
-            // Handle Control Change message
             int controllerValue = message.getControllerValue();
-            // Your code here for Control Change handling
             int controllerNumber = message.getControllerNumber();
-            // Value
-            // std::string controllerValueString = std::to_string(controllerValue);
-            // juce::Logger::writeToLog(controllerValueString);
+
             juce::Logger::writeToLog("MIDI Controller Number: " + juce::String(controllerNumber));
 
             switch (controllerNumber)
@@ -192,7 +188,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minLevel = 0;
-                    double maxLevel = 44100*10;
+                    double maxLevel = 44100 * 10;
                     double minLevel2 = 0;
                     double maxLevel2 = 10000;
 
@@ -312,6 +308,26 @@ public:
                     }
                 }
                 break;
+            case (23):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                        int LFOControl = voice->getLFOControl();
+                        juce::Logger::writeToLog(juce::String(LFOControl));
+                        if (LFOControl == 4)
+                        {
+                            voice->setLFOControl(0);
+                            juce::Logger::writeToLog(juce::String(voice->getLFOControl()));
+                        }
+                        else
+                        {
+                            voice->setLFOControl(LFOControl + 1);
+                            juce::Logger::writeToLog(juce::String(voice->getLFOControl()));
+                        }
+                        break;
+                    }
+                }
             case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
@@ -350,8 +366,32 @@ public:
                     double maxModulation = 20.0f;
 
                     double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    int LFOControl = voice->getLFOControl();
+                    juce::Logger::writeToLog(juce::String(LFOControl));
 
-                    voice->getOscillator().setLFOFreq(scaledValue);
+                    switch (LFOControl)
+                    {
+                    case 0:
+                        voice->getOscillator().setLFOFreq(scaledValue);
+                        break;
+                    case 1:
+                        voice->setLFOGainFreq(scaledValue);
+                        break;
+                    case 2:
+                        voice->changeFilterLFOFreq(scaledValue);
+                        break;
+                    case 3:
+                        voice->getOscillator().setLFOFreq(scaledValue);
+                        voice->setLFOGainFreq(scaledValue);
+                        break;
+                    case 4:
+                        voice->getOscillator().setLFOFreq(scaledValue);
+                        voice->setLFOGainFreq(scaledValue);
+                        voice->changeFilterLFOFreq(scaledValue);
+                        break;
+                    default:
+                        break;
+                    }
                 }
                 break;
             case (19):
@@ -362,10 +402,44 @@ public:
 
                     double minModulation = 0.0f;
                     double maxModulation = 100.0f;
-
                     double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    int LFOControl = voice->getLFOControl();
+                    juce::Logger::writeToLog(juce::String(LFOControl));
 
-                    voice->getOscillator().setLFODepth(scaledValue);
+                    switch (LFOControl)
+                    {
+                    case 0:
+                        juce::Logger::writeToLog(juce::String(scaledValue));
+
+                        voice->getOscillator().setLFODepth(scaledValue);
+                        voice->setLFOGainDepth(0);
+                        voice->changeFilterLFODepth(0);
+                        break;
+                    case 1:
+                        voice->getOscillator().setLFODepth(0);
+                        voice->setLFOGainDepth(scaledValue);
+                        voice->changeFilterLFODepth(0);
+                        break;
+                    case 2:
+                        voice->getOscillator().setLFODepth(0);
+                        voice->setLFOGainDepth(0);
+                        voice->changeFilterLFODepth(scaledValue);
+                        break;
+                    case 3:
+                        voice->getOscillator().setLFODepth(scaledValue);
+                        voice->setLFOGainDepth(scaledValue);
+                        voice->changeFilterLFODepth(0);
+                        break;
+                    case 4:
+                        juce::Logger::writeToLog(juce::String(scaledValue) + "todos");
+
+                        voice->getOscillator().setLFODepth(scaledValue);
+                        voice->setLFOGainDepth(scaledValue);
+                        voice->changeFilterLFODepth(scaledValue);
+                        break;
+                    default:
+                        break;
+                    }
                 }
                 break;
             default:

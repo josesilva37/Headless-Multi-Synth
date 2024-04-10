@@ -149,7 +149,6 @@ void OscData::setPitchBend(float pitchBendValue)
     {
         pitchBend = false;
     }
-    juce::Logger::writeToLog("pitch " + juce::String(pitchBendValue));
 
     double bendRange = 12.0;                 // 2 semitones
     double bendFactor = bendRange / 8192.0; // 8192 is the center value of the pitch bend range
@@ -163,7 +162,6 @@ void OscData::setPitchBend(float pitchBendValue)
     // Apply pitch bend to the currently playing note
     double pitchBendFrequencyMultiplier = std::pow(2.0, bendInSemitones / 12.0);
     pitchBendFreq = lastFreq * pitchBendFrequencyMultiplier;
-    juce::Logger::writeToLog("freq " + juce::String(pitchBendFreq));
 }
 void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
 {
@@ -194,8 +192,6 @@ void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
         if (currentFreq2 < 0)
             currentFreq2 = -currentFreq2;
         carrier.setFrequency(currentFreq2);
-            // juce::Logger::writeToLog("freq " + juce::String(currentFreq));
-
         setFrequency(currentFreq);
     }
     else
