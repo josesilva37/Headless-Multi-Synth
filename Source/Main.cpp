@@ -325,9 +325,29 @@ public:
                             voice->setLFOControl(LFOControl + 1);
                             juce::Logger::writeToLog(juce::String(voice->getLFOControl()));
                         }
-                        break;
+                        switch (voice->getLFOControl())
+                        {
+                        case 0:
+                            voice->setLFOGainDepth(0);
+                            voice->changeFilterLFODepth(0);
+                            break;
+                        case 1:
+                            voice->changeFilterLFODepth(0);
+                            voice->getOscillator().setLFODepth(0);
+                            break;
+                        case 2:
+                            voice->setLFOGainDepth(0);
+                            voice->getOscillator().setLFODepth(0);
+                            break;
+                        case 3:
+                            voice->changeFilterLFODepth(0);
+                            break;
+                        default:
+                            break;
+                        }
                     }
                 }
+                break;
             case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
@@ -367,7 +387,6 @@ public:
 
                     double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
                     int LFOControl = voice->getLFOControl();
-                    juce::Logger::writeToLog(juce::String(LFOControl));
 
                     switch (LFOControl)
                     {
@@ -404,35 +423,23 @@ public:
                     double maxModulation = 100.0f;
                     double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
                     int LFOControl = voice->getLFOControl();
-                    juce::Logger::writeToLog(juce::String(LFOControl));
 
                     switch (LFOControl)
                     {
                     case 0:
-                        juce::Logger::writeToLog(juce::String(scaledValue));
-
                         voice->getOscillator().setLFODepth(scaledValue);
-                        voice->setLFOGainDepth(0);
-                        voice->changeFilterLFODepth(0);
                         break;
                     case 1:
-                        voice->getOscillator().setLFODepth(0);
                         voice->setLFOGainDepth(scaledValue);
-                        voice->changeFilterLFODepth(0);
                         break;
                     case 2:
-                        voice->getOscillator().setLFODepth(0);
-                        voice->setLFOGainDepth(0);
                         voice->changeFilterLFODepth(scaledValue);
                         break;
                     case 3:
                         voice->getOscillator().setLFODepth(scaledValue);
                         voice->setLFOGainDepth(scaledValue);
-                        voice->changeFilterLFODepth(0);
                         break;
                     case 4:
-                        juce::Logger::writeToLog(juce::String(scaledValue) + "todos");
-
                         voice->getOscillator().setLFODepth(scaledValue);
                         voice->setLFOGainDepth(scaledValue);
                         voice->changeFilterLFODepth(scaledValue);

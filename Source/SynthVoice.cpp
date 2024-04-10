@@ -150,12 +150,16 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     osc.getNextAudioBlock(outputBuffer);
 
     float lfoValue = lfo.processSample(0);
-    float lfoMod = (lfoValue * lfoDepth) / 100;
+    juce::Logger::writeToLog(juce::String(lfoValue) + " - lfo value");
+
+    float lfoMod = (lfoValue * lfoDepth) /500;
+    juce::Logger::writeToLog(juce::String(lfoMod) + " - lfo mod");
 
     float finalGain = osc.getGain();
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
         finalGain += lfoMod;
+        juce::Logger::writeToLog(juce::String(finalGain) + " - Final Gain");
     }
 
     gain.setGainLinear(finalGain);
