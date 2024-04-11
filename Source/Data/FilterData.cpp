@@ -19,14 +19,20 @@ void FilterData::setParams(const int type, const float frequency, const float re
     setResonance(resonance);
     selectFilterType(type);
 };
-void FilterData::setFilterCutOffFrequency(float freq){
+void FilterData::setFilterCutOffFrequency(float freq)
+{
     setCutoffFrequency(freq);
     frequencyValue = freq;
 }
-void FilterData::setLFODepth(float level){
+void FilterData::setFilterRes(float res){
+    setFilterRes(res);
+}
+void FilterData::setLFODepth(float level)
+{
     lfoDepth = level;
 }
-void FilterData::setLFOFreq(float level){
+void FilterData::setLFOFreq(float level)
+{
     lfo.setFrequency(level);
 }
 void FilterData::selectFilterType(int type)
@@ -53,13 +59,17 @@ int FilterData::getFilterType()
 }
 void FilterData::processNextBlock(juce::AudioBuffer<float> &buffer)
 {
+
     juce::dsp::AudioBlock<float> block{buffer};
     float lfoValue = lfo.processSample(0);
-    float lfoMod = (lfoValue * lfoDepth) ;
 
-    if (frequencyValue + lfoMod > 0 &&  frequencyValue + lfoMod < 20000)
+    float lfoMod = (lfoValue * lfoDepth);
+    
+    float finalCutOff = frequencyValue + lfoMod;
+
+    if (finalCutOff > 0 && finalCutOff < 20000)
     {
-        setCutoffFrequency(frequencyValue + lfoMod);
+        setCutoffFrequency(finalCutOff);
     }
     process(juce::dsp::ProcessContextReplacing<float>(block));
 }

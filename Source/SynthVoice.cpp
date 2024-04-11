@@ -52,22 +52,28 @@ void SynthVoice::changeFilterResonance(float resonsance)
 {
     filter.setResonance(resonsance);
 }
-int SynthVoice::getLFOControl(){
+int SynthVoice::getLFOControl()
+{
     return LFOControl;
 }
-void SynthVoice::setLFOControl(int type){
+void SynthVoice::setLFOControl(int type)
+{
     LFOControl = type;
 }
-void SynthVoice::setLFOGainDepth(float level){
+void SynthVoice::setLFOGainDepth(float level)
+{
     lfoDepth = level;
 }
-void SynthVoice::setLFOGainFreq(float level){
+void SynthVoice::setLFOGainFreq(float level)
+{
     lfo.setFrequency(level);
 }
-void SynthVoice::changeFilterLFODepth(float level){
+void SynthVoice::changeFilterLFODepth(float level)
+{
     filter.setLFODepth(level);
 }
-void SynthVoice::changeFilterLFOFreq(float level){
+void SynthVoice::changeFilterLFOFreq(float level)
+{
     filter.setLFOFreq(level);
 }
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
@@ -114,7 +120,7 @@ void SynthVoice::setDelay(float delayLevel, float feedback)
     else
     {
         enableDelay = true;
-        delayFeedback = feedback;
+        // delayFeedback = feedback;
         delaySize = delayLevel;
         delay.setDelay(delayLevel);
     }
@@ -137,8 +143,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     gain.setGainLinear(0.1f);
     reverb.prepare(spec);
     reverb.setEnabled(false);
+    delay.reset();
     delay.prepare(spec);
-    delay.setMaximumDelayInSamples(44100 * 4);
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
 };
@@ -150,16 +156,16 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     osc.getNextAudioBlock(outputBuffer);
 
     float lfoValue = lfo.processSample(0);
-    juce::Logger::writeToLog(juce::String(lfoValue) + " - lfo value");
+    // juce::Logger::writeToLog(juce::String(lfoValue) + " - lfo value");
 
-    float lfoMod = (lfoValue * lfoDepth) /500;
-    juce::Logger::writeToLog(juce::String(lfoMod) + " - lfo mod");
+    float lfoMod = (lfoValue * lfoDepth) / 500;
+    // juce::Logger::writeToLog(juce::String(lfoMod) + " - lfo mod");
 
     float finalGain = osc.getGain();
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
         finalGain += lfoMod;
-        juce::Logger::writeToLog(juce::String(finalGain) + " - Final Gain");
+        // juce::Logger::writeToLog(juce::String(finalGain) + " - Final Gain");
     }
 
     gain.setGainLinear(finalGain);
@@ -171,25 +177,18 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         reverb.setParameters(reverbParams);
         reverb.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     }
+
     if (enableDelay)
     {
-        // float currentDelayTime = delay.getDelay();
-        // float targetDelayTime = delaySize;
-        // float delayToIncrease = delaySize - delay.getDelay() / numSamples;
-        // juce::Logger::writeToLog(juce::String(delay.getDelay()));
-        delay.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-        float feedbackAttenuation = 0.5f;
+        float feedbackAttenuation = 0.7f;
         for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
         {
-            auto *channelData = outputBuffer.getWritePointer(channel);
-            auto *delayData = audioBlock.getChannelPointer(channel);
-
+            auto *data = outputBuffer.getWritePointer(channel);
+            auto count = 0;
             for (int sample = 0; sample < numSamples; ++sample)
             {
-                // Mix delayed signal back into the input with feedback gain
-                channelData[sample] += delayData[sample] * delayFeedback;
-
-                delayFeedback *= feedbackAttenuation;
+                delay.pushSample(channel, data[sample]);
+                data[sample] += delay.popSample(channel, delay.getDelay());
             }
         }
     }

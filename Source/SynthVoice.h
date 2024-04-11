@@ -48,10 +48,10 @@ private:
     float lfoDepth = 0.0f;
     juce::dsp::Reverb reverb;
     juce::dsp::Reverb::Parameters reverbParams;
-    juce::dsp::DelayLine<float,juce::dsp::DelayLineInterpolationTypes::Linear> delay;
+    juce::dsp::DelayLine<float,juce::dsp::DelayLineInterpolationTypes::Linear> delay{44100};
     bool enableDelay = false;
     juce::dsp::Limiter<float> limiter;
-    float delayFeedback;
+    float delayFeedback=1.0f;
     float delaySize;
     int LFOControl = 0;
 
