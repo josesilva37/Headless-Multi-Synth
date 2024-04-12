@@ -115,13 +115,10 @@ void SynthVoice::setDelay(float delayLevel, float feedback)
     if (delayLevel == 0)
     {
         enableDelay = false;
-        delay.setDelay(0);
     }
     else
     {
         enableDelay = true;
-        // delayFeedback = feedback;
-        delaySize = delayLevel;
         delay.setDelay(delayLevel);
     }
 };
@@ -140,11 +137,12 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     osc.setType(0);
     filter.prepareToPlay(spec);
     gain.prepare(spec);
-    gain.setGainLinear(0.1f);
+    gain.setGainLinear(0.3f);
     reverb.prepare(spec);
     reverb.setEnabled(false);
     delay.reset();
     delay.prepare(spec);
+    delay.setMaximumDelayInSamples(44100 * 2);
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
 };
@@ -152,20 +150,16 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
-
     osc.getNextAudioBlock(outputBuffer);
 
     float lfoValue = lfo.processSample(0);
-    // juce::Logger::writeToLog(juce::String(lfoValue) + " - lfo value");
 
     float lfoMod = (lfoValue * lfoDepth) / 500;
-    // juce::Logger::writeToLog(juce::String(lfoMod) + " - lfo mod");
 
     float finalGain = osc.getGain();
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
         finalGain += lfoMod;
-        // juce::Logger::writeToLog(juce::String(finalGain) + " - Final Gain");
     }
 
     gain.setGainLinear(finalGain);
@@ -180,17 +174,19 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     if (enableDelay)
     {
-        float feedbackAttenuation = 0.7f;
+        float blockDelayFeedback = delayFeedback;
+        juce::Logger::writeToLog(juce::String(blockDelayFeedback));
         for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
         {
             auto *data = outputBuffer.getWritePointer(channel);
-            auto count = 0;
             for (int sample = 0; sample < numSamples; ++sample)
             {
                 delay.pushSample(channel, data[sample]);
-                data[sample] += delay.popSample(channel, delay.getDelay());
+                data[sample] += delay.popSample(channel, delay.getDelay()) * blockDelayFeedback;
             }
         }
+
+        blockDelayFeedback *= feedbackAttenuation;
     }
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));

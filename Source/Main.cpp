@@ -188,7 +188,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minLevel = 0;
-                    double maxLevel = 44100 * 10;
+                    double maxLevel = 44100*2;
                     double minLevel2 = 0;
                     double maxLevel2 = 10000;
 
