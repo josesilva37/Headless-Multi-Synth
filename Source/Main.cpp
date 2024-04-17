@@ -348,6 +348,23 @@ public:
                     }
                 }
                 break;
+             case (24):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                        int ADSRControl = voice->getLFOControl();
+                        if (ADSRControl == 1)
+                        {
+                            voice->setADSRControl(0);
+                        }
+                        else
+                        {
+                            voice->setADSRControl(ADSRControl + 1);
+                        }
+                    }
+                }
+                break;
             case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {

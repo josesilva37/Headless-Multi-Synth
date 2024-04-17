@@ -30,8 +30,10 @@ public:
     void setDelay(float delay, float feedback);
     void setLFOGainDepth(float level);
     void setLFOGainFreq(float level);
-    int getLFOControl();
+    int getLFOControl(){return LFOControl;};
+    int getADSRControl(){return ADSRControl;};
     void setLFOControl(int type);
+    void setADSRControl(int type);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
 
@@ -41,6 +43,7 @@ private:
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
+    juce::ADSR adsrFilter;
     FilterData filter;
     juce::dsp::Oscillator<float> lfo{[](float x)
                                      { return std::sin(x); }};
@@ -54,5 +57,6 @@ private:
     float feedbackAttenuation = 0.7f;
     float delayFeedback=1.0f;
     int LFOControl = 0;
+    int ADSRControl = 0;
 
 };

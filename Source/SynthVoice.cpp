@@ -19,25 +19,58 @@ void SynthVoice::changeAttack(float attackValue)
 
     parameters.attack = attackValue / 100;
 
-    adsr.setParameters(parameters);
+    switch (ADSRControl)
+    {
+    case 0:
+        adsr.setParameters(parameters);
+        break;
+    case 1:
+        adsrFilter.setParameters(parameters);
+        juce::Logger::writeToLog("Change Filter Attack" + juce::String(adsrFilter.getParameters().attack));
+        break;
+    }
 };
 void SynthVoice::changeDecay(float decayValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
     parameters.decay = decayValue / 100;
-    adsr.setParameters(parameters);
+    switch (ADSRControl)
+    {
+    case 0:
+        adsr.setParameters(parameters);
+        break;
+    case 1:
+        adsrFilter.setParameters(parameters);
+        break;
+    }
 };
 void SynthVoice::changeSustain(float sustainValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
     parameters.sustain = sustainValue / 100;
-    adsr.setParameters(parameters);
+    switch (ADSRControl)
+    {
+    case 0:
+        adsr.setParameters(parameters);
+        break;
+    case 1:
+        adsrFilter.setParameters(parameters);
+        break;
+    }
 };
 void SynthVoice::changeRelease(float releaseValue)
 {
     juce::ADSR::Parameters parameters = adsr.getParameters();
     parameters.release = releaseValue / 100;
-    adsr.setParameters(parameters);
+    switch (ADSRControl)
+    {
+    case 0:
+        adsr.setParameters(parameters);
+        break;
+    case 1:
+        adsrFilter.setParameters(parameters);
+        break;
+    }
 };
 void SynthVoice::changeFilterType(int type)
 {
@@ -52,13 +85,14 @@ void SynthVoice::changeFilterResonance(float resonsance)
 {
     filter.setResonance(resonsance);
 }
-int SynthVoice::getLFOControl()
-{
-    return LFOControl;
-}
+
 void SynthVoice::setLFOControl(int type)
 {
     LFOControl = type;
+}
+void SynthVoice::setADSRControl(int type)
+{
+    ADSRControl = type;
 }
 void SynthVoice::setLFOGainDepth(float level)
 {
@@ -79,10 +113,12 @@ void SynthVoice::changeFilterLFOFreq(float level)
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
     osc.setWaveFrequency(midiNoteNumber);
+    adsrFilter.noteOn();
     adsr.noteOn();
 };
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
 {
+    adsrFilter.noteOff();
     adsr.noteOff();
 };
 void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue){
@@ -126,6 +162,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 {
 
     adsr.setSampleRate(sampleRate);
+    adsrFilter.setSampleRate(sampleRate);
     juce::dsp::ProcessSpec spec;
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
@@ -150,7 +187,6 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
-    osc.getNextAudioBlock(outputBuffer);
 
     float lfoValue = lfo.processSample(0);
 
@@ -164,8 +200,12 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     gain.setGainLinear(finalGain);
 
-    filter.processNextBlock(outputBuffer);
+    osc.getNextAudioBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
+    adsrFilter.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
+    filter.setFilterCutOffADSR(adsrFilter.getNextSample());
+    filter.processNextBlock(outputBuffer);
+
     if (reverb.isEnabled())
     {
         reverb.setParameters(reverbParams);
@@ -174,19 +214,16 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     if (enableDelay)
     {
-        float blockDelayFeedback = delayFeedback;
-        juce::Logger::writeToLog(juce::String(blockDelayFeedback));
+        // juce::Logger::writeToLog(juce::String(blockDelayFeedback));
         for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
         {
             auto *data = outputBuffer.getWritePointer(channel);
             for (int sample = 0; sample < numSamples; ++sample)
             {
                 delay.pushSample(channel, data[sample]);
-                data[sample] += delay.popSample(channel, delay.getDelay()) * blockDelayFeedback;
+                data[sample] += delay.popSample(channel, delay.getDelay()) * feedbackAttenuation;
             }
         }
-
-        blockDelayFeedback *= feedbackAttenuation;
     }
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));

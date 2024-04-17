@@ -12,6 +12,7 @@ public:
     void selectFilterType(int filterType);
     int getFilterType();
     void setFilterCutOffFrequency(float frequency);
+    void setFilterCutOffADSR(float mod);
     void setFilterRes(float res);
     void setLFOFreq (float level);
     void setLFODepth(float level);

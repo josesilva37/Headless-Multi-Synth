@@ -24,6 +24,11 @@ void FilterData::setFilterCutOffFrequency(float freq)
     setCutoffFrequency(freq);
     frequencyValue = freq;
 }
+void FilterData::setFilterCutOffADSR(float mod){
+    float modulatedFreq =  getCutoffFrequency() * mod;
+    juce::Logger::writeToLog("Modulated " + juce::String(modulatedFreq));
+    setCutoffFrequency(std::fmax (std::fmin (modulatedFreq, 20000.0f), 20.0f));
+}
 void FilterData::setFilterRes(float res){
     setFilterRes(res);
 }
@@ -71,5 +76,6 @@ void FilterData::processNextBlock(juce::AudioBuffer<float> &buffer)
     {
         setCutoffFrequency(finalCutOff);
     }
+    // juce::Logger::writeToLog(juce::String(finalCutOff));
     process(juce::dsp::ProcessContextReplacing<float>(block));
 }
