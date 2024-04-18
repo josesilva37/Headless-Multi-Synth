@@ -203,7 +203,10 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     osc.getNextAudioBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
     adsrFilter.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
-    filter.setFilterCutOffADSR(adsrFilter.getNextSample());
+    if (ADSRControl == 1)
+    {
+        filter.setFilterCutOffADSR(adsrFilter.getNextSample());
+    }
     filter.processNextBlock(outputBuffer);
 
     if (reverb.isEnabled())
