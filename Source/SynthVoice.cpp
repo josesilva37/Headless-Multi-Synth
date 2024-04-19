@@ -140,10 +140,9 @@ void SynthVoice::setReverbWetLevel(float level)
     else
     {
         reverb.setEnabled(true);
+        
     }
-
-    reverbParams.wetLevel = level;
-    reverbParams.width = level;
+    reverbParams.roomSize = level;
 };
 
 void SynthVoice::setDelay(float delayLevel, float feedback)
@@ -177,13 +176,40 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     gain.setGainLinear(0.3f);
     reverb.prepare(spec);
     reverb.setEnabled(false);
+    reverbParams.damping = 0.5f;
+    reverbParams.wetLevel= 0.33f;
+    reverbParams.width =1.0f;
     delay.reset();
     delay.prepare(spec);
     delay.setMaximumDelayInSamples(44100 * 2);
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
 };
+void SynthVoice::resetSynthParams(){
+    adsr.reset();
+    adsrFilter.reset();
+    // parameters.attack = 1.0f;
+    // parameters.decay = 1.0f;
+    // parameters.release = 1.0f;
+    // parameters.sustain = 1.0f;
+    // adsr.setParameters(parameters);
+    // adsrFilter.setParameters(parameters);
+    lfoDepth = 0;
+    lfo.setFrequency(20.0f);    
+    reverbParams.damping = 0.5f;
+    reverbParams.wetLevel= 0.33f;
+    reverbParams.width =1.0f;
+    reverb.setEnabled(false);
+    delay.setDelay(0);
+    LFOControl=0;
+    osc.setType(0);
+    osc.setFmType(0);
+    osc.setFmDepth(0);
+    osc.setLFODepth(0);
+    filter.setLFODepth(0);
+    filter.setFilterCutOffFrequency(1000);
 
+}
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};

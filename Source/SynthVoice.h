@@ -34,6 +34,7 @@ public:
     int getADSRControl(){return ADSRControl;};
     void setLFOControl(int type);
     void setADSRControl(int type);
+    void resetSynthParams();
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
 
@@ -45,8 +46,7 @@ private:
     juce::ADSR::Parameters adsrParams;
     juce::ADSR adsrFilter;
     FilterData filter;
-    juce::dsp::Oscillator<float> lfo{[](float x)
-                                     { return std::sin(x); }};
+    juce::dsp::Oscillator<float> lfo{[](float x) { return std::sin(x); }};
     float lfoMod;
     float lfoDepth = 0.0f;
     juce::dsp::Reverb reverb;

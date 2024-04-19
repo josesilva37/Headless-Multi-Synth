@@ -188,7 +188,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minLevel = 0;
-                    double maxLevel = 44100*2;
+                    double maxLevel = 44100 * 2;
                     double minLevel2 = 0;
                     double maxLevel2 = 10000;
 
@@ -348,7 +348,7 @@ public:
                     }
                 }
                 break;
-             case (24):
+            case (24):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     if (controllerValue == 127)
@@ -362,6 +362,15 @@ public:
                         {
                             voice->setADSRControl(ADSRControl + 1);
                         }
+                    }
+                }
+                break;
+            case (25):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                       voice->resetSynthParams();
                     }
                 }
                 break;
