@@ -112,12 +112,14 @@ void SynthVoice::changeFilterLFOFreq(float level)
 }
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
+    whitenoiseLevel = previouseWhitenoiseLevel;
     osc.setWaveFrequency(midiNoteNumber);
     adsrFilter.noteOn();
     adsr.noteOn();
 };
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
 {
+    whitenoiseLevel = 0;
     adsrFilter.noteOff();
     adsr.noteOff();
 };
@@ -140,7 +142,6 @@ void SynthVoice::setReverbWetLevel(float level)
     else
     {
         reverb.setEnabled(true);
-        
     }
     reverbParams.roomSize = level;
 };
@@ -157,6 +158,10 @@ void SynthVoice::setDelay(float delayLevel, float feedback)
         delay.setDelay(delayLevel);
     }
 };
+
+void SynthVoice::setWhitenoiseLevel(float level){
+    previouseWhitenoiseLevel = level;
+}
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
 
@@ -177,15 +182,16 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     reverb.prepare(spec);
     reverb.setEnabled(false);
     reverbParams.damping = 0.5f;
-    reverbParams.wetLevel= 0.33f;
-    reverbParams.width =1.0f;
+    reverbParams.wetLevel = 0.33f;
+    reverbParams.width = 1.0f;
     delay.reset();
     delay.prepare(spec);
     delay.setMaximumDelayInSamples(44100 * 2);
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
 };
-void SynthVoice::resetSynthParams(){
+void SynthVoice::resetSynthParams()
+{
     adsr.reset();
     adsrFilter.reset();
     // parameters.attack = 1.0f;
@@ -195,20 +201,19 @@ void SynthVoice::resetSynthParams(){
     // adsr.setParameters(parameters);
     // adsrFilter.setParameters(parameters);
     lfoDepth = 0;
-    lfo.setFrequency(20.0f);    
+    lfo.setFrequency(20.0f);
     reverbParams.damping = 0.5f;
-    reverbParams.wetLevel= 0.33f;
-    reverbParams.width =1.0f;
+    reverbParams.wetLevel = 0.33f;
+    reverbParams.width = 1.0f;
     reverb.setEnabled(false);
     delay.setDelay(0);
-    LFOControl=0;
+    LFOControl = 0;
     osc.setType(0);
     osc.setFmType(0);
     osc.setFmDepth(0);
     osc.setLFODepth(0);
     filter.setLFODepth(0);
     filter.setFilterCutOffFrequency(1000);
-
 }
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
@@ -219,6 +224,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     float lfoMod = (lfoValue * lfoDepth) / 500;
 
     float finalGain = osc.getGain();
+
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
         finalGain += lfoMod;
@@ -229,11 +235,24 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     osc.getNextAudioBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
     adsrFilter.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
+
     if (ADSRControl == 1)
     {
         filter.setFilterCutOffADSR(adsrFilter.getNextSample());
     }
+    for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
+    {
+        auto *buffer = outputBuffer.getWritePointer(channel);
+        for (int sample = 0; sample < numSamples; ++sample)
+        {
+            // juce::Logger::writeToLog(juce::String(adsr.getNextSample()));
+            buffer[sample] += random.nextFloat() * whitenoiseLevel  - 0.125f;
+        }
+    }
+
     filter.processNextBlock(outputBuffer);
+
+    // Effects
 
     if (reverb.isEnabled())
     {
@@ -243,7 +262,6 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     if (enableDelay)
     {
-        // juce::Logger::writeToLog(juce::String(blockDelayFeedback));
         for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
         {
             auto *data = outputBuffer.getWritePointer(channel);
@@ -254,6 +272,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
             }
         }
     }
+
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 };

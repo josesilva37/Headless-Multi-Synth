@@ -233,6 +233,21 @@ public:
                     voice->changeRelease(controllerValue);
                 }
                 break;
+            case (96):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minFrequency = 0.0f;
+                    double maxFrequency = 0.35f;
+
+                    // Calculate the scaled frequency
+                    double scaledFrequency = minFrequency + (maxFrequency - minFrequency) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->setWhitenoiseLevel(scaledFrequency);
+                }
+                break;
             case (1):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {

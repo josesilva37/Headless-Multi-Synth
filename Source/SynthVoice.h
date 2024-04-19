@@ -35,6 +35,7 @@ public:
     void setLFOControl(int type);
     void setADSRControl(int type);
     void resetSynthParams();
+    void setWhitenoiseLevel(float level);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
 
@@ -58,5 +59,7 @@ private:
     float delayFeedback=1.0f;
     int LFOControl = 0;
     int ADSRControl = 0;
-
+    juce::Random random;
+    float whitenoiseLevel = 0;
+    float previouseWhitenoiseLevel;
 };
