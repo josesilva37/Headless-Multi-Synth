@@ -424,7 +424,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minModulation = 0.1f;
-                    double maxModulation = 1000.0f;
+                    double maxModulation = 400.0f;
 
                     double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
                     int LFOControl = voice->getLFOControl();

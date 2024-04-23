@@ -178,6 +178,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     osc.setType(0);
     filter.prepareToPlay(spec);
     gain.prepare(spec);
+    gain.setRampDurationSeconds(0.5);
     gain.setGainLinear(0.3f);
     reverb.prepare(spec);
     reverb.setEnabled(false);
@@ -192,8 +193,11 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 };
 void SynthVoice::resetSynthParams()
 {
+    juce::Logger::writeToLog(juce::String(adsr.getParameters().attack));
     adsr.reset();
     adsrFilter.reset();
+        juce::Logger::writeToLog(juce::String(adsr.getParameters().attack));
+
     // parameters.attack = 1.0f;
     // parameters.decay = 1.0f;
     // parameters.release = 1.0f;
