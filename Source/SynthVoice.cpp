@@ -118,7 +118,6 @@ void SynthVoice::changeFilterLFOFreq(float level)
 }
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
-    // whitenoiseLevel = previouseWhitenoiseLevel;
     osc.setWaveFrequency(midiNoteNumber);
     adsrFilter.noteOn();
     adsr.noteOn();
@@ -126,10 +125,9 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
 };
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
 {
-    // whitenoiseLevel = 0;
+    adsrWhiteNoise.noteOff();
     adsrFilter.noteOff();
     adsr.noteOff();
-    adsrWhiteNoise.noteOff();
 };
 void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue){
 
@@ -197,6 +195,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     delay.reset();
     delay.prepare(spec);
     delay.setMaximumDelayInSamples(44100 * 2);
+    whitenoiseParams.release = 0.4f;
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
 };
@@ -373,9 +372,10 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         auto *buffer = outputBuffer.getWritePointer(channel);
         for (int sample = 0; sample < numSamples; ++sample)
         {
-            buffer[sample] += random.nextFloat() * (whitenoiseLevel * adsrWhiteNoise.getNextSample()) - 0.125f;
+            buffer[sample] += random.nextFloat() * (whitenoiseLevel * adsrWhiteNoise.getNextSample())- 0.125f; 
         }
     }
+    
 
     filter.processNextBlock(outputBuffer);
 
