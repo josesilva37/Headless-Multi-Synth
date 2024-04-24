@@ -98,19 +98,6 @@ int OscData::getFmType()
 {
     return fmType;
 }
-void OscData::setGain(const float gainLinear)
-{
-    gain.setGainLinear(gainLinear);
-    wasGainSet = true;
-}
-float OscData::getGain()
-{
-    return gain.getGainLinear();
-}
-bool OscData::isGainSet()
-{
-    return wasGainSet;
-}
 
 void OscData::setFmDepth(const float depth)
 {
@@ -122,6 +109,12 @@ void OscData::setFmFreq(const float freq)
     fmOsc.setFrequency(freq);
     setFrequency(juce::MidiMessage::getMidiNoteInHertz(lastMidiNote));
 }
+float OscData::getFmDepth(){
+    return fmDepth;
+}
+float OscData::getFmFreq(){
+    return fmOsc.getFrequency();
+}
 void OscData::setLFOFreq(const float freq)
 {
     lfo.setFrequency(freq);
@@ -129,6 +122,12 @@ void OscData::setLFOFreq(const float freq)
 void OscData::setLFODepth(const float depth)
 {
     lfoDepth = depth;
+}
+float OscData::getLFOFreq(){
+    return lfo.getFrequency();
+}
+float OscData::getLFODepth(){
+    return lfoDepth;
 }
 void OscData::setWaveFrequency(const int midiNoteNumber)
 {

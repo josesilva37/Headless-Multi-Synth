@@ -16,6 +16,8 @@ public:
     void setFilterRes(float res);
     void setLFOFreq (float level);
     void setLFODepth(float level);
+    float getLFOFreq();
+    float getLFODepth();
     
 private:
     float frequencyValue=1000;

@@ -15,46 +15,38 @@ void SynthVoice::changeFmFreq(float freq)
 }
 void SynthVoice::changeAttack(float attackValue)
 {
-    juce::ADSR::Parameters parameters = adsr.getParameters();
-
-    parameters.attack = attackValue / 100;
-
     switch (ADSRControl)
     {
     case 0:
-        adsr.setParameters(parameters);
+        adsrParams.attack = attackValue;
         break;
     case 1:
-        adsrFilter.setParameters(parameters);
-        juce::Logger::writeToLog("Change Filter Attack" + juce::String(adsrFilter.getParameters().attack));
+        filterParams.attack = attackValue;
         break;
     }
 };
 void SynthVoice::changeDecay(float decayValue)
 {
-    juce::ADSR::Parameters parameters = adsr.getParameters();
-    parameters.decay = decayValue / 100;
     switch (ADSRControl)
     {
     case 0:
-        adsr.setParameters(parameters);
+        adsrParams.decay =  decayValue;
         break;
     case 1:
-        adsrFilter.setParameters(parameters);
+        filterParams.decay = decayValue;
         break;
     }
 };
 void SynthVoice::changeSustain(float sustainValue)
 {
-    juce::ADSR::Parameters parameters = adsr.getParameters();
-    parameters.sustain = sustainValue / 100;
+
     switch (ADSRControl)
     {
     case 0:
-        adsr.setParameters(parameters);
+        adsrParams.sustain =  sustainValue;
         break;
     case 1:
-        adsrFilter.setParameters(parameters);
+        filterParams.sustain = sustainValue;
         break;
     }
 };
@@ -65,13 +57,16 @@ void SynthVoice::changeRelease(float releaseValue)
     switch (ADSRControl)
     {
     case 0:
-        adsr.setParameters(parameters);
+        adsrParams.release =  releaseValue;
         break;
     case 1:
-        adsrFilter.setParameters(parameters);
+        filterParams.release = releaseValue;
         break;
     }
 };
+void SynthVoice::setGain(float level){
+    gainLevel = level;
+}
 void SynthVoice::changeFilterType(int type)
 {
     filter.selectFilterType(type);
@@ -159,7 +154,8 @@ void SynthVoice::setDelay(float delayLevel, float feedback)
     }
 };
 
-void SynthVoice::setWhitenoiseLevel(float level){
+void SynthVoice::setWhitenoiseLevel(float level)
+{
     previouseWhitenoiseLevel = level;
 }
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
@@ -193,17 +189,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 };
 void SynthVoice::resetSynthParams()
 {
-    juce::Logger::writeToLog(juce::String(adsr.getParameters().attack));
     adsr.reset();
     adsrFilter.reset();
-        juce::Logger::writeToLog(juce::String(adsr.getParameters().attack));
-
-    // parameters.attack = 1.0f;
-    // parameters.decay = 1.0f;
-    // parameters.release = 1.0f;
-    // parameters.sustain = 1.0f;
-    // adsr.setParameters(parameters);
-    // adsrFilter.setParameters(parameters);
     lfoDepth = 0;
     lfo.setFrequency(20.0f);
     reverbParams.damping = 0.5f;
@@ -218,7 +205,121 @@ void SynthVoice::resetSynthParams()
     osc.setLFODepth(0);
     filter.setLFODepth(0);
     filter.setFilterCutOffFrequency(1000);
+    whitenoiseLevel = 0;
 }
+juce::ValueTree SynthVoice::serialize()
+{
+    juce::ValueTree tree("SynthPreset");
+    tree.setProperty("Gain", gain.getGainLinear(), nullptr);
+    tree.setProperty("Attack", adsr.getParameters().attack, nullptr);
+    tree.setProperty("Decay", adsr.getParameters().decay, nullptr);
+    tree.setProperty("Sustain", adsr.getParameters().sustain, nullptr);
+    tree.setProperty("Release", adsrFilter.getParameters().release, nullptr);
+    tree.setProperty("AttackFilter", adsrFilter.getParameters().attack, nullptr);
+    tree.setProperty("DecayFilter", adsrFilter.getParameters().decay, nullptr);
+    tree.setProperty("SustainFilter", adsrFilter.getParameters().sustain, nullptr);
+    tree.setProperty("ReleaseFilter", adsrFilter.getParameters().release, nullptr);
+    tree.setProperty("LfoFrequency", lfo.getFrequency(), nullptr);
+    tree.setProperty("LfoDepth", lfoDepth, nullptr);
+    tree.setProperty("OscType", osc.getType(), nullptr);
+    tree.setProperty("FilterCutOff", filter.getCutoffFrequency(), nullptr);
+    tree.setProperty("FilterResonance", filter.getResonance(), nullptr);
+    tree.setProperty("FilterType", filter.getFilterType(), nullptr);
+    tree.setProperty("FilterLFOFreq", filter.getLFOFreq(), nullptr);
+    tree.setProperty("FilterLFODepth", filter.getLFODepth(), nullptr);
+    tree.setProperty("whitenoiseLevel", whitenoiseLevel, nullptr);
+    tree.setProperty("FmType", osc.getFmType(), nullptr);
+    tree.setProperty("FmDepth", osc.getFmDepth(), nullptr);
+    tree.setProperty("FmFreq", osc.getFmFreq(), nullptr);
+    tree.setProperty("OscLFOFreq", osc.getLFOFreq(), nullptr);
+    tree.setProperty("OscLFODepth", osc.getLFODepth(), nullptr);
+    tree.setProperty("Reverb", reverb.getParameters().roomSize, nullptr);
+    tree.setProperty("Delay", delay.getDelay(), nullptr);
+    tree.setProperty("EnabledDelay", enableDelay ? "true" : "false", nullptr);
+    tree.setProperty("EnabledReverb", reverb.isEnabled() ? "true": "false", nullptr);
+    return tree;
+}
+void SynthVoice::savePreset(int presetNumber)
+{
+    juce::File rootFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
+    auto tree = serialize();
+    juce::Logger::writeToLog(rootFolder.getFullPathName());
+
+    std::unique_ptr<juce::XmlElement> xml(tree.createXml());
+
+    if (xml != nullptr)
+    {
+        juce::File fileToSave = rootFolder.getChildFile("preset" + juce::String(presetNumber) + ".xml");
+        juce::Logger::writeToLog("Saving preset to: " + fileToSave.getFullPathName());
+
+        if (xml->writeTo(fileToSave, {}))
+        {
+            juce::Logger::writeToLog("Preset saved successfully");
+        }
+        else
+        {
+            juce::Logger::writeToLog("Error saving preset");
+        }
+    }
+    else
+    {
+        // Handle error creating XML...
+    }
+}
+
+void SynthVoice::loadPreset(int presetNumber)
+{
+    juce::ValueTree tree;
+    juce::File rootFolder = juce::File::getSpecialLocation(juce::File::SpecialLocationType::userApplicationDataDirectory);
+    auto xml{juce::XmlDocument::parse(rootFolder.getChildFile("preset" + juce::String(presetNumber) + ".xml"))};
+
+    if (xml != nullptr)
+    {
+        juce::Logger::writeToLog("XML content before parsing:\n" + xml->toString());
+
+        juce::Logger::writeToLog(juce::String(xml->getStringAttribute("Gain")));
+        juce::Logger::writeToLog(juce::String(xml->getStringAttribute("Gain").getFloatValue()));
+        setGain(xml->getStringAttribute("Gain").getFloatValue());
+        lfo.setFrequency(xml->getStringAttribute("LfoFrequency").getFloatValue());
+        setLFOGainDepth(xml->getStringAttribute("LfoDepth").getFloatValue());
+        osc.setType(xml->getStringAttribute("OscType").getIntValue());
+        filter.setCutoffFrequency(xml->getStringAttribute("FilterCutOff").getFloatValue());
+        filter.setResonance(xml->getStringAttribute("FilterResonance").getFloatValue());
+        filter.selectFilterType(xml->getStringAttribute("FilterType").getIntValue());
+        filter.setLFOFreq(xml->getStringAttribute("FilterLFOFreq").getFloatValue());
+        filter.setLFODepth(xml->getStringAttribute("FilterLFODepth").getFloatValue());
+        setWhitenoiseLevel(xml->getStringAttribute("whitenoiseLevel").getFloatValue());
+        osc.setFmType(xml->getStringAttribute("FmType").getIntValue());
+        osc.setFmDepth(xml->getStringAttribute("FmDepth").getFloatValue());
+        osc.setFmFreq(xml->getStringAttribute("FmFreq").getFloatValue());
+        osc.setLFOFreq(xml->getStringAttribute("OscLFOFreq").getFloatValue());
+        osc.setLFODepth(xml->getStringAttribute("OscLFODepth").getFloatValue());
+        reverbParams.roomSize = xml->getStringAttribute("Reverb").getFloatValue();
+        delay.setDelay(xml->getStringAttribute("Delay").getIntValue());
+        enableDelay = xml->getStringAttribute("EnabledDelay")  == "true" ? true : false;
+        reverb.setEnabled(xml->getStringAttribute("EnabledReverb")  == "true" ? true : false);
+        adsrParams.attack = xml->getStringAttribute("Attack").getFloatValue();
+        adsrParams.decay = xml->getStringAttribute("Decay").getFloatValue();
+        adsrParams.sustain = xml->getStringAttribute("Sustain").getFloatValue();
+        adsrParams.release = xml->getStringAttribute("Release").getFloatValue();
+        filterParams.attack = xml->getStringAttribute("AttackFilter").getFloatValue();
+        filterParams.decay = xml->getStringAttribute("DecayFilter").getFloatValue();
+        filterParams.sustain = xml->getStringAttribute("SustainFilter").getFloatValue();
+        filterParams.release = xml->getStringAttribute("ReleaseFilter").getFloatValue();
+        // deserializeParams(xml);
+    }
+    else
+    {
+        // Handle error reading XML...
+        juce::Logger::writeToLog("Failed to Load");
+    }
+}
+// void SynthVoice::deserializeParams(const juce::ValueTree &tree)
+// {
+//     juce::Logger::writeToLog(juce::String(tree.getNumProperties()));
+//     // std::cout << tree.getPropertyName(0) << std::endl;
+// }
+
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
@@ -227,7 +328,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     float lfoMod = (lfoValue * lfoDepth) / 500;
 
-    float finalGain = osc.getGain();
+    float finalGain = gainLevel;
 
     if (finalGain + lfoMod >= 0 && finalGain + lfoMod <= 1.0f)
     {
@@ -235,6 +336,9 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     }
 
     gain.setGainLinear(finalGain);
+
+    adsr.setParameters(adsrParams);
+    adsrFilter.setParameters(filterParams);
 
     osc.getNextAudioBlock(outputBuffer);
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
@@ -250,7 +354,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         for (int sample = 0; sample < numSamples; ++sample)
         {
             // juce::Logger::writeToLog(juce::String(adsr.getNextSample()));
-            buffer[sample] += random.nextFloat() * whitenoiseLevel  - 0.125f;
+            buffer[sample] += random.nextFloat() * whitenoiseLevel - 0.125f;
         }
     }
 

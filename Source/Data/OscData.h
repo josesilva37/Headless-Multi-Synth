@@ -20,15 +20,16 @@ public:
   int getType();
   void setFmType(const int fmSelection);
   int getFmType();
-  void setGain(const float levelInDecibels);
-  float getGain();
-  bool isGainSet();
   void getNextAudioBlock(juce::AudioBuffer<float> &buffer);
   void setWaveFrequency(const int midiNoteNumber);
   void setFmFreq(const float freq);
+  float getFmFreq();
   void setFmDepth(const float depth);
+  float getFmDepth();
   void setLFOFreq(const float freq);
+  float getLFOFreq();
   void setLFODepth(const float res);
+  float getLFODepth();
   void setPitchBend(float bend);
 private:
   juce::dsp::Oscillator<float> fmOsc { [](float x) { return std::sin (x); }};
@@ -40,8 +41,6 @@ private:
   float lfoDepth= 0.0f;
   float lastFreq;
   int lastMidiNote {0};
-  juce::dsp::Gain<float> gain;
-  bool wasGainSet;
   int type;
   int fmType;
   bool pitchBend = false;

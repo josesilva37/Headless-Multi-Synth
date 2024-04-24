@@ -164,7 +164,7 @@ public:
 
                     // Calculate the scaled frequency
                     double scaledGain = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
-                    voice->getOscillator().setGain(scaledGain);
+                    voice->setGain(scaledGain);
                 }
                 break;
             case (72):
@@ -201,39 +201,60 @@ public:
             case (77):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    juce::Logger::writeToLog("Entrei no changeAttack");
 
-                    voice->changeAttack(controllerValue);
+                    int minControllerValue = 0;
+                    int maxControllerValue = 127;
+
+                    double minLevel = 0.0f;
+                    double maxLevel = 1.0f;
+                    double scaledAttack = minLevel + (maxLevel - minLevel) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->changeAttack(scaledAttack);
                 }
                 break;
 
             case (93):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    juce::Logger::writeToLog("Entrei no changeDecay");
+                      int minControllerValue = 0;
+                    int maxControllerValue = 127;
 
-                    voice->changeDecay(controllerValue);
+                    double minLevel = 0.0f;
+                    double maxLevel = 1.0f;
+                    double scaledDecay = minLevel + (maxLevel - minLevel) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->changeDecay(scaledDecay);
                 }
                 break;
 
             case (73):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    juce::Logger::writeToLog("Entrei no changeSustain");
+                      int minControllerValue = 0;
+                    int maxControllerValue = 127;
 
-                    voice->changeSustain(controllerValue);
+                    double minLevel = 0.0f;
+                    double maxLevel = 1.0f;
+                    double scaledSustain = minLevel + (maxLevel - minLevel) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->changeSustain(scaledSustain);
                 }
                 break;
 
             case (75):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                    juce::Logger::writeToLog("Entrei no changeRelease");
+                      int minControllerValue = 0;
+                    int maxControllerValue = 127;
 
-                    voice->changeRelease(controllerValue);
+                    double minLevel = 0.0f;
+                    double maxLevel = 1.0f;
+                    double scaledRelease = minLevel + (maxLevel - minLevel) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
+                    voice->changeRelease(scaledRelease);
                 }
                 break;
-            case (96):
+            case (91):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
                     int minControllerValue = 0;
@@ -271,7 +292,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minModulation = 0.0f;
-                    double maxModulation = 10000.0f;
+                    double maxModulation = 2000.0f;
 
                     // Calculate the scaled frequency
                     double scaledModulation = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
@@ -385,7 +406,7 @@ public:
                 {
                     if (controllerValue == 127)
                     {
-                       voice->resetSynthParams();
+                        voice->resetSynthParams();
                     }
                 }
                 break;
@@ -417,6 +438,17 @@ public:
                     voice->getFilter().setResonance(scaledResonance);
                 }
                 break;
+            case (96):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->savePreset(1);
+                }
+            case (97):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    voice->loadPreset(1);
+                }
+
             case (18):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
@@ -424,9 +456,13 @@ public:
                     int maxControllerValue = 127;
 
                     double minModulation = 0.1f;
-                    double maxModulation = 400.0f;
+                    double maxModulation = 20.0f;
+                    double minModulationFilter = 0.1f;
+                    double maxModulationFilter = 1000.0f;
 
                     double scaledValue = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+                    double scaledValueFilter = minModulationFilter + (maxModulationFilter - minModulationFilter) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
+
                     int LFOControl = voice->getLFOControl();
 
                     switch (LFOControl)
@@ -438,7 +474,7 @@ public:
                         voice->setLFOGainFreq(scaledValue);
                         break;
                     case 2:
-                        voice->changeFilterLFOFreq(scaledValue);
+                        voice->changeFilterLFOFreq(scaledValueFilter);
                         break;
                     case 3:
                         voice->getOscillator().setLFOFreq(scaledValue);
@@ -447,7 +483,7 @@ public:
                     case 4:
                         voice->getOscillator().setLFOFreq(scaledValue);
                         voice->setLFOGainFreq(scaledValue);
-                        voice->changeFilterLFOFreq(scaledValue);
+                        voice->changeFilterLFOFreq(scaledValueFilter);
                         break;
                     default:
                         break;

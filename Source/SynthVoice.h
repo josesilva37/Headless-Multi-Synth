@@ -15,6 +15,7 @@ public:
     void pitchWheelMoved(int newPitchWheelValue) override;
     void prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels);
     void renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples) override;
+    void setGain(float value);
     void changeAttack(float attackValue);
     void changeDecay(float decayValue);
     void changeSustain(float sustainValue);
@@ -38,6 +39,10 @@ public:
     void setWhitenoiseLevel(float level);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
+    void deserializeParams(const juce::ValueTree& tree);
+    juce::ValueTree serialize();
+    void savePreset(int presetNumber);
+    void loadPreset(int presetNumber);
 
 private:
     OscData osc;
@@ -45,6 +50,7 @@ private:
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
     juce::ADSR::Parameters adsrParams;
+    juce::ADSR::Parameters filterParams;
     juce::ADSR adsrFilter;
     FilterData filter;
     juce::dsp::Oscillator<float> lfo{[](float x) { return std::sin(x); }};
@@ -62,4 +68,5 @@ private:
     juce::Random random;
     float whitenoiseLevel = 0;
     float previouseWhitenoiseLevel;
+    float gainLevel;
 };

@@ -61,6 +61,12 @@ int FilterData::getFilterType()
 {
     return filterType;
 }
+float FilterData::getLFODepth(){
+    return lfoDepth;
+}
+float FilterData::getLFOFreq(){
+    return lfo.getFrequency();
+}
 void FilterData::processNextBlock(juce::AudioBuffer<float> &buffer)
 {
 
