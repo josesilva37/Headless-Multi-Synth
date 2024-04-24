@@ -389,8 +389,8 @@ public:
                 {
                     if (controllerValue == 127)
                     {
-                        int ADSRControl = voice->getLFOControl();
-                        if (ADSRControl == 1)
+                        int ADSRControl = voice->getADSRControl();
+                        if (ADSRControl == 2)
                         {
                             voice->setADSRControl(0);
                         }

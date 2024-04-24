@@ -39,7 +39,6 @@ public:
     void setWhitenoiseLevel(float level);
     FilterData &getFilter() { return filter; };
     OscData &getOscillator() { return osc; };
-    void deserializeParams(const juce::ValueTree& tree);
     juce::ValueTree serialize();
     void savePreset(int presetNumber);
     void loadPreset(int presetNumber);
@@ -49,9 +48,11 @@ private:
     juce::AudioBuffer<float> synthBuffer;
     juce::dsp::Gain<float> gain;
     juce::ADSR adsr;
+    juce::ADSR adsrFilter;
+    juce::ADSR adsrWhiteNoise;
+    juce::ADSR::Parameters whitenoiseParams;
     juce::ADSR::Parameters adsrParams;
     juce::ADSR::Parameters filterParams;
-    juce::ADSR adsrFilter;
     FilterData filter;
     juce::dsp::Oscillator<float> lfo{[](float x) { return std::sin(x); }};
     float lfoMod;
@@ -67,6 +68,5 @@ private:
     int ADSRControl = 0;
     juce::Random random;
     float whitenoiseLevel = 0;
-    float previouseWhitenoiseLevel;
     float gainLevel;
 };

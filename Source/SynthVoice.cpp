@@ -23,6 +23,9 @@ void SynthVoice::changeAttack(float attackValue)
     case 1:
         filterParams.attack = attackValue;
         break;
+    case 2:
+        whitenoiseParams.attack = attackValue;
+        break;
     }
 };
 void SynthVoice::changeDecay(float decayValue)
@@ -30,10 +33,13 @@ void SynthVoice::changeDecay(float decayValue)
     switch (ADSRControl)
     {
     case 0:
-        adsrParams.decay =  decayValue;
+        adsrParams.decay = decayValue;
         break;
     case 1:
         filterParams.decay = decayValue;
+        break;
+    case 2:
+        whitenoiseParams.decay = decayValue;
         break;
     }
 };
@@ -43,28 +49,33 @@ void SynthVoice::changeSustain(float sustainValue)
     switch (ADSRControl)
     {
     case 0:
-        adsrParams.sustain =  sustainValue;
+        adsrParams.sustain = sustainValue;
         break;
     case 1:
         filterParams.sustain = sustainValue;
+        break;
+    case 2:
+        whitenoiseParams.sustain = sustainValue;
         break;
     }
 };
 void SynthVoice::changeRelease(float releaseValue)
 {
-    juce::ADSR::Parameters parameters = adsr.getParameters();
-    parameters.release = releaseValue / 100;
     switch (ADSRControl)
     {
     case 0:
-        adsrParams.release =  releaseValue;
+        adsrParams.release = releaseValue;
         break;
     case 1:
         filterParams.release = releaseValue;
         break;
+    case 2:
+        whitenoiseParams.release = releaseValue;
+        break;
     }
 };
-void SynthVoice::setGain(float level){
+void SynthVoice::setGain(float level)
+{
     gainLevel = level;
 }
 void SynthVoice::changeFilterType(int type)
@@ -107,16 +118,18 @@ void SynthVoice::changeFilterLFOFreq(float level)
 }
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
-    whitenoiseLevel = previouseWhitenoiseLevel;
+    // whitenoiseLevel = previouseWhitenoiseLevel;
     osc.setWaveFrequency(midiNoteNumber);
     adsrFilter.noteOn();
     adsr.noteOn();
+    adsrWhiteNoise.noteOn();
 };
 void SynthVoice::stopNote(float velocity, bool allowTailOff)
 {
-    whitenoiseLevel = 0;
+    // whitenoiseLevel = 0;
     adsrFilter.noteOff();
     adsr.noteOff();
+    adsrWhiteNoise.noteOff();
 };
 void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue){
 
@@ -156,7 +169,7 @@ void SynthVoice::setDelay(float delayLevel, float feedback)
 
 void SynthVoice::setWhitenoiseLevel(float level)
 {
-    previouseWhitenoiseLevel = level;
+    whitenoiseLevel = level;
 }
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
@@ -219,6 +232,10 @@ juce::ValueTree SynthVoice::serialize()
     tree.setProperty("DecayFilter", adsrFilter.getParameters().decay, nullptr);
     tree.setProperty("SustainFilter", adsrFilter.getParameters().sustain, nullptr);
     tree.setProperty("ReleaseFilter", adsrFilter.getParameters().release, nullptr);
+    tree.setProperty("AttackWhitenoise", adsrWhiteNoise.getParameters().attack, nullptr);
+    tree.setProperty("DecayWhitenoise", adsrWhiteNoise.getParameters().decay, nullptr);
+    tree.setProperty("SustainWhitenoise", adsrWhiteNoise.getParameters().sustain, nullptr);
+    tree.setProperty("ReleaseWhitenoise", adsrWhiteNoise.getParameters().release, nullptr);
     tree.setProperty("LfoFrequency", lfo.getFrequency(), nullptr);
     tree.setProperty("LfoDepth", lfoDepth, nullptr);
     tree.setProperty("OscType", osc.getType(), nullptr);
@@ -236,7 +253,7 @@ juce::ValueTree SynthVoice::serialize()
     tree.setProperty("Reverb", reverb.getParameters().roomSize, nullptr);
     tree.setProperty("Delay", delay.getDelay(), nullptr);
     tree.setProperty("EnabledDelay", enableDelay ? "true" : "false", nullptr);
-    tree.setProperty("EnabledReverb", reverb.isEnabled() ? "true": "false", nullptr);
+    tree.setProperty("EnabledReverb", reverb.isEnabled() ? "true" : "false", nullptr);
     return tree;
 }
 void SynthVoice::savePreset(int presetNumber)
@@ -296,8 +313,8 @@ void SynthVoice::loadPreset(int presetNumber)
         osc.setLFODepth(xml->getStringAttribute("OscLFODepth").getFloatValue());
         reverbParams.roomSize = xml->getStringAttribute("Reverb").getFloatValue();
         delay.setDelay(xml->getStringAttribute("Delay").getIntValue());
-        enableDelay = xml->getStringAttribute("EnabledDelay")  == "true" ? true : false;
-        reverb.setEnabled(xml->getStringAttribute("EnabledReverb")  == "true" ? true : false);
+        enableDelay = xml->getStringAttribute("EnabledDelay") == "true" ? true : false;
+        reverb.setEnabled(xml->getStringAttribute("EnabledReverb") == "true" ? true : false);
         adsrParams.attack = xml->getStringAttribute("Attack").getFloatValue();
         adsrParams.decay = xml->getStringAttribute("Decay").getFloatValue();
         adsrParams.sustain = xml->getStringAttribute("Sustain").getFloatValue();
@@ -306,6 +323,11 @@ void SynthVoice::loadPreset(int presetNumber)
         filterParams.decay = xml->getStringAttribute("DecayFilter").getFloatValue();
         filterParams.sustain = xml->getStringAttribute("SustainFilter").getFloatValue();
         filterParams.release = xml->getStringAttribute("ReleaseFilter").getFloatValue();
+        whitenoiseParams.attack = xml->getStringAttribute("AttackWhitenoise").getFloatValue();
+        whitenoiseParams.decay = xml->getStringAttribute("DecayWhitenoise").getFloatValue();
+        whitenoiseParams.sustain = xml->getStringAttribute("SustainWhitenoise").getFloatValue();
+        whitenoiseParams.release = xml->getStringAttribute("ReleaseWhitenoise").getFloatValue();
+
         // deserializeParams(xml);
     }
     else
@@ -314,11 +336,6 @@ void SynthVoice::loadPreset(int presetNumber)
         juce::Logger::writeToLog("Failed to Load");
     }
 }
-// void SynthVoice::deserializeParams(const juce::ValueTree &tree)
-// {
-//     juce::Logger::writeToLog(juce::String(tree.getNumProperties()));
-//     // std::cout << tree.getPropertyName(0) << std::endl;
-// }
 
 void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int startSample, int numSamples)
 {
@@ -339,8 +356,11 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     adsr.setParameters(adsrParams);
     adsrFilter.setParameters(filterParams);
+    adsrWhiteNoise.setParameters(whitenoiseParams);
 
     osc.getNextAudioBlock(outputBuffer);
+
+    adsrWhiteNoise.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
     adsrFilter.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
 
@@ -353,8 +373,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         auto *buffer = outputBuffer.getWritePointer(channel);
         for (int sample = 0; sample < numSamples; ++sample)
         {
-            // juce::Logger::writeToLog(juce::String(adsr.getNextSample()));
-            buffer[sample] += random.nextFloat() * whitenoiseLevel - 0.125f;
+            buffer[sample] += random.nextFloat() * (whitenoiseLevel * adsrWhiteNoise.getNextSample()) - 0.125f;
         }
     }
 
