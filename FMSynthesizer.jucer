@@ -12,6 +12,10 @@
         <FILE id="ss7wQH" name="FilterData.h" compile="0" resource="0" file="Source/Data/FilterData.h"/>
         <FILE id="h2hQ41" name="OscData.cpp" compile="1" resource="0" file="Source/Data/OscData.cpp"/>
         <FILE id="LAOG9W" name="OscData.h" compile="0" resource="0" file="Source/Data/OscData.h"/>
+        <FILE id="YTcle4" name="WavetableOscillator.cpp" compile="1" resource="0"
+              file="Source/Data/WavetableOscillator.cpp"/>
+        <FILE id="tRg2Fo" name="WavetableOscillator.h" compile="0" resource="0"
+              file="Source/Data/WavetableOscillator.h"/>
       </GROUP>
       <FILE id="cCG963" name="SynthSound.h" compile="0" resource="0" file="Source/SynthSound.h"/>
       <FILE id="gQeSKo" name="SynthVoice.cpp" compile="1" resource="0" file="Source/SynthVoice.cpp"/>

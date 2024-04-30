@@ -1,4 +1,5 @@
 #include "SynthVoice.h"
+#include "Data/WavetableOscillator.h"
 
 bool SynthVoice::canPlaySound(juce::SynthesiserSound *sound)
 {
@@ -118,7 +119,38 @@ void SynthVoice::changeFilterLFOFreq(float level)
 }
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
 {
-    osc.setWaveFrequency(midiNoteNumber);
+    if (isWavetableOn)
+    {
+
+        for (auto oscillatorIndex = 0; oscillatorIndex < oscillatorsSin.size(); ++oscillatorIndex)
+        {
+            int midiNoteIncreased;
+            switch (frequencySpacing)
+            {
+            case 0:
+                midiNoteIncreased = midiNoteNumber + oscillatorIndex;
+                break;
+            case 1:
+                midiNoteIncreased = midiNoteNumber + (5 * oscillatorIndex);
+                break;
+            case 2:
+                midiNoteIncreased = midiNoteNumber + (7 * oscillatorIndex);
+                break;
+            case 3:
+                midiNoteIncreased = midiNoteNumber + (12 * oscillatorIndex);
+                break;
+            }
+            if (midiNoteIncreased <= 127)
+            {
+                juce::Logger::writeToLog(juce::String(midiNoteIncreased));
+                oscillatorsSin[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+            }
+        }
+    }
+    else
+    {
+        osc.setWaveFrequency(midiNoteNumber);
+    }
     adsrFilter.noteOn();
     adsr.noteOn();
     adsrWhiteNoise.noteOn();
@@ -169,9 +201,136 @@ void SynthVoice::setWhitenoiseLevel(float level)
 {
     whitenoiseLevel = level;
 }
+void SynthVoice::createWaveTable()
+{
+    // Wavetables Initialization
+    waveTableSin.setSize(1, (int)tableSize + 1);
+    waveTableSin.clear();
+    waveTableSinBalanced.setSize(1, (int)tableSize + 1);
+    waveTableSinBalanced.clear();
+    waveTableSinEven.setSize(1, (int)tableSize + 1);
+    waveTableSinEven.clear();
+    waveTableSinOdd.setSize(1, (int)tableSize + 1);
+    waveTableSinOdd.clear();
+    waveTableSinIncreasing.setSize(1, (int)tableSize + 1);
+    waveTableSinIncreasing.clear();
+    waveTableSinDecreasing.setSize(1, (int)tableSize + 1);
+    waveTableSinDecreasing.clear();
+    waveTableSinSparse.setSize(1, (int)tableSize + 1);
+    waveTableSinSparse.clear();
+
+    // Harmonics
+    int balancedHarmonics[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    float balancedHarmonicWeights[] = {0.2f, 0.2f, 0.2f, 0.1f, 0.1f, 0.05f, 0.05f, 0.01f};
+    int evenHarmonics[] = {2, 4, 6, 8, 10, 12, 14, 16};
+    float evenHarmonicWeights[] = {0.5f, 0.2f, 0.1f, 0.05f, 0.03f, 0.02f, 0.01f, 0.005f};
+    int oddHarmonics[] = {1, 3, 5, 7, 9, 11, 13, 15};
+    float oddHarmonicWeights[] = {0.3f, 0.2f, 0.15f, 0.1f, 0.08f, 0.05f, 0.04f, 0.03f};
+    int increasingHarmonics[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    float increasingHarmonicWeights[] = {0.1f, 0.15f, 0.2f, 0.25f, 0.3f, 0.35f, 0.4f, 0.45f};
+    int decreasingHarmonics[] = {1, 2, 3, 4, 5, 6, 7, 8};
+    float decreasingHarmonicWeights[] = {0.4f, 0.3f, 0.2f, 0.1f, 0.05f, 0.03f, 0.02f, 0.01f};
+    int sparceHarmonics[] = {1, 3, 7, 13, 19, 25, 31, 37};
+    float sparseHarmonicWeights[] = {0.5f, 0.2f, 0.1f, 0.05f, 0.03f, 0.02f, 0.01f, 0.005f};
+
+    // Wavetable buffer
+    auto *samplesSin = waveTableSin.getWritePointer(0);
+    auto *samplesSinBalanced = waveTableSinBalanced.getWritePointer(0);
+    auto *samplesSinOdd = waveTableSinBalanced.getWritePointer(0);
+    auto *samplesSinEven = waveTableSinBalanced.getWritePointer(0);
+    auto *samplesSinIncreasing = waveTableSinBalanced.getWritePointer(0);
+    auto *samplesSinDecreasing = waveTableSinBalanced.getWritePointer(0);
+    auto *samplesSinSparse = waveTableSinBalanced.getWritePointer(0);
+
+    // Simple Sin Wavetable
+    auto angleDelta = juce::MathConstants<double>::twoPi / (double)(tableSize - 1);
+    auto currentAngle = 0.0;
+
+    for (unsigned int i = 0; i < tableSize; ++i)
+    {
+        auto sample = std::sin(currentAngle);
+        samplesSin[i] += (float)sample;
+        currentAngle += angleDelta;
+    }
+
+    // Sin Wavetables With Changed Harmonics
+    for (auto harmonic = 0; harmonic < juce::numElementsInArray(evenHarmonics); ++harmonic)
+    {
+        auto angleDeltaBalanced = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * balancedHarmonics[harmonic];
+        auto angleDeltaOdd = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * oddHarmonics[harmonic];
+        auto angleDeltaEven = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * evenHarmonics[harmonic];
+        auto angleDeltaIncreasing = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * increasingHarmonics[harmonic];
+        auto angleDeltaDecreasing = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * decreasingHarmonics[harmonic];
+        auto angleDeltaSparse = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * sparceHarmonics[harmonic];
+
+        auto currentAngleBalanced = 0.0;
+        auto currentAngleOdd = 0.0;
+        auto currentAngleEven = 0.0;
+        auto currentAngleIncreased = 0.0;
+        auto currentAngleDecreased = 0.0;
+        auto currentAngleSparse = 0.0;
+
+        for (unsigned int i = 0; i < tableSize; ++i)
+        {
+            auto sampleSinBalanced = 0.0f;
+            auto sampleSinOdd = 0.0f;
+            auto sampleSinEven = 0.0f;
+            auto sampleSinIncreased = 0.0f;
+            auto sampleSinDecreased = 0.0f;
+            auto sampleSinSparse = 0.0f;
+
+            for (int table = 0; table < 2; table++)
+            {
+                switch (table)
+                {
+                case 0:
+                    sampleSinBalanced = std::sin(currentAngleBalanced);
+                    samplesSinBalanced[i] += (float)sampleSinBalanced * balancedHarmonicWeights[harmonic];
+                    currentAngleBalanced += angleDeltaBalanced;
+                    break;
+                case 1:
+                    sampleSinOdd = std::sin(currentAngleOdd);
+                    samplesSinOdd[i] += (float)sampleSinOdd * oddHarmonicWeights[harmonic];
+                    currentAngleOdd += angleDeltaOdd;
+                    break;
+                case 2:
+                    sampleSinEven = std::sin(currentAngleEven);
+                    samplesSinEven[i] += (float)sampleSinEven * evenHarmonicWeights[harmonic];
+                    currentAngleEven += angleDeltaEven;
+                    break;
+                case 3:
+                    sampleSinIncreased = std::sin(currentAngleIncreased);
+                    samplesSinIncreasing[i] += (float)sampleSinIncreased * increasingHarmonicWeights[harmonic];
+                    currentAngleIncreased += angleDeltaIncreasing;
+                    break;
+                case 4:
+                    sampleSinDecreased = std::sin(currentAngleDecreased);
+                    samplesSinDecreasing[i] += (float)sampleSinDecreased * decreasingHarmonicWeights[harmonic];
+                    currentAngleDecreased += angleDeltaDecreasing;
+                    break;
+                case 5:
+                    sampleSinSparse = std::sin(currentAngleSparse);
+                    samplesSinSparse[i] += (float)sampleSinSparse * sparseHarmonicWeights[harmonic];
+                    currentAngleSparse += angleDeltaSparse;
+                    break;
+                default:
+                    break;
+                }
+            }
+        }
+    }
+    // State the last sample to equals the last sample
+    samplesSin[tableSize] = samplesSin[0];
+    samplesSinBalanced[tableSize] = samplesSinBalanced[0];
+    samplesSinOdd[tableSize] = samplesSinOdd[0];
+    samplesSinEven[tableSize] = samplesSinEven[0];
+    samplesSinIncreasing[tableSize] = samplesSinIncreasing[0];
+    samplesSinDecreasing[tableSize] = samplesSinDecreasing[0];
+    samplesSinSparse[tableSize] = samplesSinSparse[0];
+}
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
-
+    createWaveTable();
     adsr.setSampleRate(sampleRate);
     adsrFilter.setSampleRate(sampleRate);
     juce::dsp::ProcessSpec spec;
@@ -198,6 +357,27 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     whitenoiseParams.release = 0.4f;
     limiter.prepare(spec);
     limiter.setThreshold(0.5f);
+
+    auto numberOfOscillators = 10;
+    for (auto i = 0; i < numberOfOscillators; ++i)
+    {
+        auto *oscillatorSin = new WavetableOscillator(waveTableSin);
+        oscillatorsSin.add(oscillatorSin);
+        auto *oscillatorBalanced = new WavetableOscillator(waveTableSinBalanced);
+        oscillatorsSinBalance.add(oscillatorBalanced);
+        auto *oscillatorOdd = new WavetableOscillator(waveTableSinOdd);
+        oscillatorsSinOdd.add(oscillatorOdd);
+        auto *oscillatorEven = new WavetableOscillator(waveTableSinEven);
+        oscillatorsSinEven.add(oscillatorEven);
+        auto *oscillatorIncreasing = new WavetableOscillator(waveTableSinIncreasing);
+        oscillatorsSinIncreasing.add(oscillatorIncreasing);
+        auto *oscillatorDecreasing = new WavetableOscillator(waveTableSinDecreasing);
+        oscillatorsSinDecreasing.add(oscillatorDecreasing);
+        auto *oscillatorSparse = new WavetableOscillator(waveTableSinSparse);
+        oscillatorsSinSparse.add(oscillatorSparse);
+    }
+
+    wavetableLevel = 0.25f / (float)numberOfOscillators;
 };
 void SynthVoice::resetSynthParams()
 {
@@ -357,7 +537,30 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
     adsrFilter.setParameters(filterParams);
     adsrWhiteNoise.setParameters(whitenoiseParams);
 
-    osc.getNextAudioBlock(outputBuffer);
+    if (isWavetableOn)
+    {
+        auto *leftBuffer = outputBuffer.getWritePointer(0); // [7]
+        auto *rightBuffer = outputBuffer.getWritePointer(1);
+
+        // outputBuffer.clearActiveBufferRegion();
+
+        for (auto oscillatorIndex = 0; oscillatorIndex < oscillatorsSin.size(); ++oscillatorIndex)
+        {
+            auto *oscillator = oscillatorsSin.getUnchecked(oscillatorIndex); // [8]
+
+            for (auto sample = 0; sample < outputBuffer.getNumSamples(); ++sample)
+            {
+                auto levelSample = oscillator->getNextSample() * wavetableLevel; // [9]
+
+                leftBuffer[sample] += levelSample; // [10]
+                rightBuffer[sample] += levelSample;
+            }
+        }
+    }
+    else
+    {
+        osc.getNextAudioBlock(outputBuffer);
+    }
 
     adsrWhiteNoise.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
     adsr.applyEnvelopeToBuffer(outputBuffer, 0, outputBuffer.getNumSamples());
@@ -372,10 +575,9 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         auto *buffer = outputBuffer.getWritePointer(channel);
         for (int sample = 0; sample < numSamples; ++sample)
         {
-            buffer[sample] += random.nextFloat() * (whitenoiseLevel * adsrWhiteNoise.getNextSample())- 0.125f; 
+            buffer[sample] += random.nextFloat() * (whitenoiseLevel * adsrWhiteNoise.getNextSample()) - 0.125f;
         }
     }
-    
 
     filter.processNextBlock(outputBuffer);
 

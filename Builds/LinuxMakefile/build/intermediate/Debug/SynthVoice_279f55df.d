@@ -319,4 +319,4 @@ build/intermediate/Debug/SynthVoice_279f55df.o: \
  ../../JuceLibraryCode/modules/juce_dsp/widgets/juce_Phaser.h \
  ../../JuceLibraryCode/modules/juce_dsp/widgets/juce_Chorus.h \
  ../../Source/SynthSound.h ../../Source/Data/OscData.h \
- ../../Source/Data/FilterData.h
+ ../../Source/Data/FilterData.h ../../Source/Data/WavetableOscillator.h
