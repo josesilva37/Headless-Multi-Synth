@@ -44,7 +44,8 @@ public:
     void savePreset(int presetNumber);
     void loadPreset(int presetNumber);
     void createWaveTable();
-
+    void setOscillatorHarmonics();
+    void setFrequencySpacing();
 private:
     OscData osc;
     juce::AudioBuffer<float> synthBuffer;
@@ -88,7 +89,7 @@ private:
     juce::AudioSampleBuffer waveTableSinIncreasing;
     juce::AudioSampleBuffer waveTableSinDecreasing;
     juce::AudioSampleBuffer waveTableSinSparse;
-
+    int oscillatorHarmonics = 0;
     bool isWavetableOn = true;
     int frequencySpacing = 0;
 };

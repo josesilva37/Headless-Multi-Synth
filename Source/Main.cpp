@@ -216,7 +216,7 @@ public:
             case (93):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                      int minControllerValue = 0;
+                    int minControllerValue = 0;
                     int maxControllerValue = 127;
 
                     double minLevel = 0.0f;
@@ -230,7 +230,7 @@ public:
             case (73):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                      int minControllerValue = 0;
+                    int minControllerValue = 0;
                     int maxControllerValue = 127;
 
                     double minLevel = 0.0f;
@@ -244,7 +244,7 @@ public:
             case (75):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-                      int minControllerValue = 0;
+                    int minControllerValue = 0;
                     int maxControllerValue = 127;
 
                     double minLevel = 0.0f;
@@ -407,6 +407,24 @@ public:
                     if (controllerValue == 127)
                     {
                         voice->resetSynthParams();
+                    }
+                }
+                break;
+            case (26):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                        voice->setOscillatorHarmonics();
+                    }
+                }
+                break;
+            case (27):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                        voice->setFrequencySpacing();
                     }
                 }
                 break;

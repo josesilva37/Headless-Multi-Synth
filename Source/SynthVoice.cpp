@@ -143,7 +143,30 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
             if (midiNoteIncreased <= 127)
             {
                 juce::Logger::writeToLog(juce::String(midiNoteIncreased));
-                oscillatorsSin[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                switch (oscillatorHarmonics)
+                {
+                case 0:
+                    oscillatorsSin[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 1:
+                    oscillatorsSinBalance[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 2:
+                    oscillatorsSinOdd[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 3:
+                    oscillatorsSinEven[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 4:
+                    oscillatorsSinIncreasing[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 5:
+                    oscillatorsSinDecreasing[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 6:
+                    oscillatorsSinSparse[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                }
             }
         }
     }
@@ -236,11 +259,11 @@ void SynthVoice::createWaveTable()
     // Wavetable buffer
     auto *samplesSin = waveTableSin.getWritePointer(0);
     auto *samplesSinBalanced = waveTableSinBalanced.getWritePointer(0);
-    auto *samplesSinOdd = waveTableSinBalanced.getWritePointer(0);
-    auto *samplesSinEven = waveTableSinBalanced.getWritePointer(0);
-    auto *samplesSinIncreasing = waveTableSinBalanced.getWritePointer(0);
-    auto *samplesSinDecreasing = waveTableSinBalanced.getWritePointer(0);
-    auto *samplesSinSparse = waveTableSinBalanced.getWritePointer(0);
+    auto *samplesSinOdd = waveTableSinOdd.getWritePointer(0);
+    auto *samplesSinEven = waveTableSinEven.getWritePointer(0);
+    auto *samplesSinIncreasing = waveTableSinIncreasing.getWritePointer(0);
+    auto *samplesSinDecreasing = waveTableSinDecreasing.getWritePointer(0);
+    auto *samplesSinSparse = waveTableSinSparse.getWritePointer(0);
 
     // Simple Sin Wavetable
     auto angleDelta = juce::MathConstants<double>::twoPi / (double)(tableSize - 1);
@@ -279,12 +302,13 @@ void SynthVoice::createWaveTable()
             auto sampleSinDecreased = 0.0f;
             auto sampleSinSparse = 0.0f;
 
-            for (int table = 0; table < 2; table++)
+            for (int table = 0; table < 6; table++)
             {
                 switch (table)
                 {
                 case 0:
                     sampleSinBalanced = std::sin(currentAngleBalanced);
+                    juce::Logger::writeToLog(juce::String(sampleSinBalanced));
                     samplesSinBalanced[i] += (float)sampleSinBalanced * balancedHarmonicWeights[harmonic];
                     currentAngleBalanced += angleDeltaBalanced;
                     break;
@@ -379,6 +403,25 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
 
     wavetableLevel = 0.25f / (float)numberOfOscillators;
 };
+
+void SynthVoice::setOscillatorHarmonics()
+{
+    if (oscillatorHarmonics == 6)
+    {
+        oscillatorHarmonics = 0;
+    }
+    else
+    {
+        oscillatorHarmonics++;
+    }
+}
+void SynthVoice::setFrequencySpacing(){
+    if(frequencySpacing == 3){
+        frequencySpacing = 0;
+    }else{
+        frequencySpacing++;
+    }
+}
 void SynthVoice::resetSynthParams()
 {
     adsr.reset();
@@ -539,20 +582,39 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 
     if (isWavetableOn)
     {
-        auto *leftBuffer = outputBuffer.getWritePointer(0); // [7]
+        auto *leftBuffer = outputBuffer.getWritePointer(0);
         auto *rightBuffer = outputBuffer.getWritePointer(1);
-
-        // outputBuffer.clearActiveBufferRegion();
 
         for (auto oscillatorIndex = 0; oscillatorIndex < oscillatorsSin.size(); ++oscillatorIndex)
         {
-            auto *oscillator = oscillatorsSin.getUnchecked(oscillatorIndex); // [8]
+            auto *oscillator = oscillatorsSin.getUnchecked(oscillatorIndex);
+            switch (oscillatorHarmonics)
+            {
+            case 1:
+                oscillator = oscillatorsSinBalance.getUnchecked(oscillatorIndex);
+                break;
+            case 2:
+                oscillator = oscillatorsSinOdd.getUnchecked(oscillatorIndex);
+                break;
+            case 3:
+                oscillator = oscillatorsSinEven.getUnchecked(oscillatorIndex);
+                break;
+            case 4:
+                oscillator = oscillatorsSinIncreasing.getUnchecked(oscillatorIndex);
+                break;
+            case 5:
+                oscillator = oscillatorsSinDecreasing.getUnchecked(oscillatorIndex);
+                break;
+            case 6:
+                oscillator = oscillatorsSinSparse.getUnchecked(oscillatorIndex);
+                break;
+            }
 
             for (auto sample = 0; sample < outputBuffer.getNumSamples(); ++sample)
             {
-                auto levelSample = oscillator->getNextSample() * wavetableLevel; // [9]
+                auto levelSample = oscillator->getNextSample() * wavetableLevel;
 
-                leftBuffer[sample] += levelSample; // [10]
+                leftBuffer[sample] += levelSample;
                 rightBuffer[sample] += levelSample;
             }
         }
