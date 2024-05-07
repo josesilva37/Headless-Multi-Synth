@@ -90,6 +90,6 @@ private:
     juce::AudioSampleBuffer waveTableSinDecreasing;
     juce::AudioSampleBuffer waveTableSinSparse;
     int oscillatorHarmonics = 0;
-    bool isWavetableOn = true;
+    bool isWavetableOn = false;
     int frequencySpacing = 0;
 };

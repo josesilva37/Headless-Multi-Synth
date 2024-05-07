@@ -366,6 +366,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     lfo.setFrequency(20.0f);
     osc.prepareToPlay(spec);
     osc.setType(0);
+
     filter.prepareToPlay(spec);
     gain.prepare(spec);
     gain.setRampDurationSeconds(0.5);

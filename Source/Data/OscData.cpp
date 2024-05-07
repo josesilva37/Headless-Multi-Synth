@@ -14,8 +14,12 @@ void OscData::prepareToPlay(juce::dsp::ProcessSpec spec)
 {
     lfo.prepare(spec);
     fmOsc.prepare(spec);
-    carrier.prepare(spec);
     prepare(spec);
+    OP1.prepare(spec);
+    OP2.prepare(spec);
+    OP3.prepare(spec);
+    OP4.prepare(spec);
+    OP5.prepare(spec);
     lfo.setFrequency(0.0f);
 }
 void OscData::setType(const int oscSelection)
@@ -109,10 +113,12 @@ void OscData::setFmFreq(const float freq)
     fmOsc.setFrequency(freq);
     setFrequency(juce::MidiMessage::getMidiNoteInHertz(lastMidiNote));
 }
-float OscData::getFmDepth(){
+float OscData::getFmDepth()
+{
     return fmDepth;
 }
-float OscData::getFmFreq(){
+float OscData::getFmFreq()
+{
     return fmOsc.getFrequency();
 }
 void OscData::setLFOFreq(const float freq)
@@ -123,18 +129,17 @@ void OscData::setLFODepth(const float depth)
 {
     lfoDepth = depth;
 }
-float OscData::getLFOFreq(){
+float OscData::getLFOFreq()
+{
     return lfo.getFrequency();
 }
-float OscData::getLFODepth(){
+float OscData::getLFODepth()
+{
     return lfoDepth;
 }
 void OscData::setWaveFrequency(const int midiNoteNumber)
 {
-    juce::Logger::writeToLog(juce::String(lfoMod));
-
     setFrequency((juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber)));
-    carrier.setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber));
     lastMidiNote = midiNoteNumber;
     lastFreq = juce::MidiMessage::getMidiNoteInHertz(midiNoteNumber);
 }
@@ -149,7 +154,7 @@ void OscData::setPitchBend(float pitchBendValue)
         pitchBend = false;
     }
 
-    double bendRange = 12.0;                 // 2 semitones
+    double bendRange = 12.0;                // 2 semitones
     double bendFactor = bendRange / 8192.0; // 8192 is the center value of the pitch bend range
 
     // Convert raw pitch bend value to a bend factor ranging from -1.0 to 1.0
@@ -162,47 +167,76 @@ void OscData::setPitchBend(float pitchBendValue)
     double pitchBendFrequencyMultiplier = std::pow(2.0, bendInSemitones / 12.0);
     pitchBendFreq = lastFreq * pitchBendFrequencyMultiplier;
 }
-void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
+
+void OscData::processFMAlgh1(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
 
     for (int ch = 0; ch < block.getNumChannels(); ++ch)
     {
+        auto *data = buffer.getWritePointer(ch);
         for (int s = 0; s < block.getNumSamples(); ++s)
         {
-            fmMod = fmOsc.processSample(block.getSample(ch, s)) * fmDepth;
-            lfoMod = lfo.processSample(block.getSample(ch, s)) * lfoDepth;
-            // use more fmmod and different algorthyms by changin the formula+
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * 50;
+            op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * 100;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * 650;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * 40;
 
-            // float outputSample = processSample(block.getSample(ch, s)) + carrier.processSample(block.getSample(ch, s));
-            //  processSample(block.getSample(ch, s));
-            // block.setSample(ch, s, outputSample);
+            op5Mod += op5Mod * 0.5;
+
+            float currentFreq = lastFreq + op1Mod;
+            float chain2Freq = lastFreq + op3Mod + op4Mod + op5Mod;
+
+            if (currentFreq < 0)
+            {
+                currentFreq = -currentFreq;
+            }
+            if (chain2Freq < 0)
+            {
+                chain2Freq = -currentFreq;
+            }
+
+            setFrequency(currentFreq);
+            OP2.setFrequency(chain2Freq);
+
+            data[s] += OP2.processSample(0);
         }
     }
+}
+void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
+{
+    juce::dsp::AudioBlock<float> block{buffer};
 
-    if (pitchBend)
+    switch (FmAlgh)
     {
-        juce::Logger::writeToLog("Ptich " + juce::String(pitchBendFreq));
+    case 0:
+        for (int ch = 0; ch < block.getNumChannels(); ++ch)
+        {
+            for (int s = 0; s < block.getNumSamples(); ++s)
+            {
+                fmMod = fmOsc.processSample(block.getSample(ch, s)) * fmDepth;
+                lfoMod = lfo.processSample(block.getSample(ch, s)) * lfoDepth;
 
-        float currentFreq = pitchBendFreq + fmMod + lfoMod;
-        float currentFreq2 = pitchBendFreq + fmMod + lfoMod;
-        if (currentFreq < 0)
-            currentFreq = -currentFreq;
-        if (currentFreq2 < 0)
-            currentFreq2 = -currentFreq2;
-        carrier.setFrequency(currentFreq2);
-        setFrequency(currentFreq);
-    }
-    else
-    {
-        float currentFreq = lastFreq + fmMod + lfoMod;
-        float currentFreq2 = lastFreq + fmMod + lfoMod;
-        if (currentFreq < 0)
-            currentFreq = -currentFreq;
-        if (currentFreq2 < 0)
-            currentFreq2 = -currentFreq2;
-        carrier.setFrequency(currentFreq2);
-        setFrequency(currentFreq);
+                float currentFreq = lastFreq + fmMod + lfoMod;
+
+                if (pitchBend)
+                {
+                    currentFreq += pitchBendFreq;
+                }
+
+                if (currentFreq < 0)
+                {
+                    currentFreq = -currentFreq;
+                }
+
+                setFrequency(currentFreq);
+            }
+        }
+        break;
+    case 1:
+        processFMAlgh1(buffer);
+        break;
     }
 
     process(juce::dsp::ProcessContextReplacing<float>(block));
