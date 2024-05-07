@@ -308,7 +308,6 @@ void SynthVoice::createWaveTable()
                 {
                 case 0:
                     sampleSinBalanced = std::sin(currentAngleBalanced);
-                    juce::Logger::writeToLog(juce::String(sampleSinBalanced));
                     samplesSinBalanced[i] += (float)sampleSinBalanced * balancedHarmonicWeights[harmonic];
                     currentAngleBalanced += angleDeltaBalanced;
                     break;

@@ -109,45 +109,51 @@ public:
                 {
                     if (controllerValue == 127)
                     {
+                        if (voice->getOscillator().getFmAlgh() == 0)
+                        {
 
-                        int type = voice->getOscillator().getFmType();
-                        if (type != 3)
-                        {
-                            type = type + 1;
-                        }
-                        else
-                        {
-                            type = 0;
-                        }
-                        switch (type)
-                        {
-                        case 0:
-                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            int type = voice->getOscillator().getFmType();
+                            if (type != 3)
                             {
-                                voice->getOscillator().setFmType(0);
+                                type = type + 1;
                             }
-                            break;
-                        case 1:
-                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            else
                             {
-                                voice->getOscillator().setFmType(1);
+                                type = 0;
                             }
-                            break;
-                        case 2:
-                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                            switch (type)
                             {
-                                voice->getOscillator().setFmType(2);
-                            }
-                            break;
-                        case 3:
-                            if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                            {
-                                voice->getOscillator().setFmType(3);
-                            }
-                            break;
+                            case 0:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getOscillator().setFmType(0);
+                                }
+                                break;
+                            case 1:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getOscillator().setFmType(1);
+                                }
+                                break;
+                            case 2:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getOscillator().setFmType(2);
+                                }
+                                break;
+                            case 3:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getOscillator().setFmType(3);
+                                }
+                                break;
 
-                        default:
-                            break;
+                            default:
+                                break;
+                            }
+                        }else
+                        {
+                            voice->getOscillator().setSelectedOperator();
                         }
                     }
                 }
@@ -292,7 +298,7 @@ public:
                     int maxControllerValue = 127;
 
                     double minModulation = 0.0f;
-                    double maxModulation = 2000.0f;
+                    double maxModulation = 1000.0f;
 
                     // Calculate the scaled frequency
                     double scaledModulation = minModulation + (maxModulation - minModulation) * (controllerValue - minControllerValue) / (maxControllerValue - minControllerValue);
@@ -428,6 +434,14 @@ public:
                     }
                 }
                 break;
+            case (28):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                        voice->getOscillator().setFmAlgh();
+                    }
+                }
             case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {

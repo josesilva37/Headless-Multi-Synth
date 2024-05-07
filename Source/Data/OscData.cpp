@@ -105,13 +105,66 @@ int OscData::getFmType()
 
 void OscData::setFmDepth(const float depth)
 {
-    fmDepth = depth;
-    setFrequency(juce::MidiMessage::getMidiNoteInHertz(lastMidiNote));
+    if (FmAlgh == 0)
+    {
+
+        fmDepth = depth;
+        setFrequency(juce::MidiMessage::getMidiNoteInHertz(lastMidiNote));
+    }
+    else
+    {
+        switch (selectedOperator)
+        {
+        case 1:
+            op1Depth = depth;
+            break;
+        case 2:
+            op2Depth = depth;
+            break;
+        case 3:
+            op3Depth = depth;
+            break;
+        case 4:
+            op4Depth = depth;
+            break;
+        case 5:
+            op5Depth = depth;
+            break;
+        default:
+            break;
+        }
+    }
 }
 void OscData::setFmFreq(const float freq)
 {
-    fmOsc.setFrequency(freq);
-    setFrequency(juce::MidiMessage::getMidiNoteInHertz(lastMidiNote));
+    if (FmAlgh == 0)
+    {
+        fmOsc.setFrequency(freq);
+        setFrequency(juce::MidiMessage::getMidiNoteInHertz(lastMidiNote));
+    }
+    else
+    {
+        switch (selectedOperator)
+        {
+        case 1:
+            OP1.setFrequency(freq);
+            break;
+        case 2:
+            OP2.setFrequency(freq);
+            break;
+        case 3:
+            OP3.setFrequency(freq);
+            break;
+        case 4:
+            OP4.setFrequency(freq);
+            break;
+        case 5:
+            OP5.setFrequency(freq);
+            break;
+        default:
+            break;
+        }
+    }
 }
 float OscData::getFmDepth()
 {
@@ -171,34 +224,38 @@ void OscData::setPitchBend(float pitchBendValue)
 void OscData::processFMAlgh1(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
+    juce::Logger::writeToLog("op1" + juce::String(OP1.getFrequency()));
+    juce::Logger::writeToLog("op2" + juce::String(OP2.getFrequency()));
+    juce::Logger::writeToLog("op3" + juce::String(OP3.getFrequency()));
+    juce::Logger::writeToLog("op4" + juce::String(OP4.getFrequency()));
+    juce::Logger::writeToLog("op5" + juce::String(OP5.getFrequency()));
 
     for (int ch = 0; ch < block.getNumChannels(); ++ch)
     {
         auto *data = buffer.getWritePointer(ch);
         for (int s = 0; s < block.getNumSamples(); ++s)
         {
-            op1Mod = OP1.processSample(block.getSample(ch, s)) * 50;
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * op1Depth;
             op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
-            op3Mod = OP3.processSample(block.getSample(ch, s)) * 100;
-            op4Mod = OP4.processSample(block.getSample(ch, s)) * 650;
-            op5Mod = OP5.processSample(block.getSample(ch, s)) * 40;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * op3Depth;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
 
-            op5Mod += op5Mod * 0.5;
+            float op5Frequency = OP5.getFrequency() + op5Mod * 0.5;
+            OP5.setFrequency(std::abs(op5Frequency));
 
-            float currentFreq = lastFreq + op1Mod;
+            float op4Frequency = OP4.getFrequency() + op5Mod;
+            OP4.setFrequency(std::abs(op4Frequency));
+
+            float op3Frequency = OP3.getFrequency() + op4Mod;
+            OP3.setFrequency(std::abs(op3Frequency));
+
             float chain2Freq = lastFreq + op3Mod + op4Mod + op5Mod;
 
-            if (currentFreq < 0)
-            {
-                currentFreq = -currentFreq;
-            }
-            if (chain2Freq < 0)
-            {
-                chain2Freq = -currentFreq;
-            }
+            float currentFreq = lastFreq + op1Mod;
 
-            setFrequency(currentFreq);
-            OP2.setFrequency(chain2Freq);
+            setFrequency(std::abs(currentFreq));
+            OP2.setFrequency(std::abs(chain2Freq));
 
             data[s] += OP2.processSample(0);
         }
@@ -219,18 +276,11 @@ void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
                 lfoMod = lfo.processSample(block.getSample(ch, s)) * lfoDepth;
 
                 float currentFreq = lastFreq + fmMod + lfoMod;
-
                 if (pitchBend)
                 {
                     currentFreq += pitchBendFreq;
                 }
-
-                if (currentFreq < 0)
-                {
-                    currentFreq = -currentFreq;
-                }
-
-                setFrequency(currentFreq);
+                setFrequency(std::abs(currentFreq));
             }
         }
         break;

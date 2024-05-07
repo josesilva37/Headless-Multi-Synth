@@ -32,6 +32,9 @@ public:
   float getLFODepth();
   void setPitchBend(float bend);
   void processFMAlgh1(juce::AudioBuffer<float> &buffer);
+  void setFmAlgh(){if(FmAlgh!=1){FmAlgh++;}else{FmAlgh==0;};}
+  int getFmAlgh(){return FmAlgh;};
+  void setSelectedOperator(){if(selectedOperator!=5){selectedOperator++;}else{selectedOperator=1;}};
 
 private:
   juce::dsp::Oscillator<float> fmOsc{[](float x)
@@ -46,7 +49,6 @@ private:
                                    { return std::sin(x); }};
   juce::dsp::Oscillator<float> OP5{[](float x)
                                    { return std::sin(x); }};
-
   juce::dsp::Oscillator<float> lfo{[](float x)
                                    { return std::sin(x); }};
   float fmMod{5.0f};
@@ -62,4 +64,5 @@ private:
   bool pitchBend = false;
   float pitchBendFreq;
   int FmAlgh = 0;
+  int selectedOperator = 1;
 };
