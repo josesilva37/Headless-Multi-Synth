@@ -151,7 +151,8 @@ public:
                             default:
                                 break;
                             }
-                        }else
+                        }
+                        else
                         {
                             voice->getOscillator().setSelectedOperator();
                         }
@@ -310,43 +311,53 @@ public:
             case (22):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {
-
-                    int type = voice->getFilter().getFilterType();
-                    juce::Logger::writeToLog(juce::String(type));
-
-                    if (type != 2)
+                    if (controllerValue == 127)
                     {
-                        type = type + 1;
-                    }
-                    else
-                    {
-                        type = 0;
-                    }
-                    juce::Logger::writeToLog(juce::String(type));
+                        int type = voice->getFilter().getFilterType();
 
-                    switch (type)
-                    {
-                    case 0:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                        switch (voice->getButtonsMode())
                         {
-                            voice->getFilter().selectFilterType(0);
-                        }
-                        break;
-                    case 1:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getFilter().selectFilterType(1);
-                        }
-                        break;
-                    case 2:
-                        if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
-                        {
-                            voice->getFilter().selectFilterType(2);
-                        }
-                        break;
+                        case 0:
+                            if (type != 2)
+                            {
+                                type = type + 1;
+                            }
+                            else
+                            {
+                                type = 0;
+                            }
+                            switch (type)
+                            {
+                            case 0:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getFilter().selectFilterType(0);
+                                }
+                                break;
+                            case 1:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getFilter().selectFilterType(1);
+                                }
+                                break;
+                            case 2:
+                                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                                {
+                                    voice->getFilter().selectFilterType(2);
+                                }
+                                break;
 
-                    default:
-                        break;
+                            default:
+                                break;
+                            }
+                            break;
+                        case 1:
+                            voice->loadPreset(1);
+                            break;
+                        case 2:
+                            voice->savePreset(1);
+                            break;
+                        }
                     }
                 }
                 break;
@@ -356,35 +367,43 @@ public:
                     if (controllerValue == 127)
                     {
                         int LFOControl = voice->getLFOControl();
-                        juce::Logger::writeToLog(juce::String(LFOControl));
-                        if (LFOControl == 4)
-                        {
-                            voice->setLFOControl(0);
-                            juce::Logger::writeToLog(juce::String(voice->getLFOControl()));
-                        }
-                        else
-                        {
-                            voice->setLFOControl(LFOControl + 1);
-                            juce::Logger::writeToLog(juce::String(voice->getLFOControl()));
-                        }
-                        switch (voice->getLFOControl())
+                        switch (voice->getButtonsMode())
                         {
                         case 0:
-                            voice->setLFOGainDepth(0);
-                            voice->changeFilterLFODepth(0);
+                            if (LFOControl == 4)
+                            {
+                                voice->setLFOControl(0);
+                            }
+                            else
+                            {
+                                voice->setLFOControl(LFOControl + 1);
+                            }
+                            switch (voice->getLFOControl())
+                            {
+                            case 0:
+                                voice->setLFOGainDepth(0);
+                                voice->changeFilterLFODepth(0);
+                                break;
+                            case 1:
+                                voice->changeFilterLFODepth(0);
+                                voice->getOscillator().setLFODepth(0);
+                                break;
+                            case 2:
+                                voice->setLFOGainDepth(0);
+                                voice->getOscillator().setLFODepth(0);
+                                break;
+                            case 3:
+                                voice->changeFilterLFODepth(0);
+                                break;
+                            default:
+                                break;
+                            }
                             break;
                         case 1:
-                            voice->changeFilterLFODepth(0);
-                            voice->getOscillator().setLFODepth(0);
+                            voice->loadPreset(2);
                             break;
                         case 2:
-                            voice->setLFOGainDepth(0);
-                            voice->getOscillator().setLFODepth(0);
-                            break;
-                        case 3:
-                            voice->changeFilterLFODepth(0);
-                            break;
-                        default:
+                            voice->savePreset(2);
                             break;
                         }
                     }
@@ -396,13 +415,24 @@ public:
                     if (controllerValue == 127)
                     {
                         int ADSRControl = voice->getADSRControl();
-                        if (ADSRControl == 2)
+                        switch (voice->getButtonsMode())
                         {
-                            voice->setADSRControl(0);
-                        }
-                        else
-                        {
-                            voice->setADSRControl(ADSRControl + 1);
+                        case 0:
+                            if (ADSRControl == 2)
+                            {
+                                voice->setADSRControl(0);
+                            }
+                            else
+                            {
+                                voice->setADSRControl(ADSRControl + 1);
+                            }
+                            break;
+                        case 1:
+                            voice->loadPreset(3);
+                            break;
+                        case 2:
+                            voice->savePreset(3);
+                            break;
                         }
                     }
                 }
@@ -412,7 +442,19 @@ public:
                 {
                     if (controllerValue == 127)
                     {
-                        voice->resetSynthParams();
+                        switch (voice->getButtonsMode())
+                        {
+                        case 0:
+                            voice->resetSynthParams();
+
+                            break;
+                        case 1:
+                            voice->loadPreset(4);
+                            break;
+                        case 2:
+                            voice->savePreset(4);
+                            break;
+                        }
                     }
                 }
                 break;
@@ -421,7 +463,21 @@ public:
                 {
                     if (controllerValue == 127)
                     {
-                        voice->setOscillatorHarmonics();
+                                                juce::Logger::writeToLog("Mode:"+ juce::String(voice->getButtonsMode()));
+
+                        switch (voice->getButtonsMode())
+                        {
+                        case 0:
+                            voice->setOscillatorHarmonics();
+
+                            break;
+                        case 1:
+                            voice->loadPreset(5);
+                            break;
+                        case 2:
+                            voice->savePreset(5);
+                            break;
+                        }
                     }
                 }
                 break;
@@ -430,7 +486,20 @@ public:
                 {
                     if (controllerValue == 127)
                     {
-                        voice->setFrequencySpacing();
+                                                juce::Logger::writeToLog("Mode:"+ juce::String(voice->getButtonsMode()));
+
+                        switch (voice->getButtonsMode())
+                        {
+                        case 0:
+                            voice->setFrequencySpacing();
+                            break;
+                        case 1:
+                            voice->loadPreset(6);
+                            break;
+                        case 2:
+                            voice->savePreset(6);
+                            break;
+                        }
                     }
                 }
                 break;
@@ -439,9 +508,32 @@ public:
                 {
                     if (controllerValue == 127)
                     {
-                        voice->getOscillator().setFmAlgh();
+                        juce::Logger::writeToLog("Mode:"+ juce::String(voice->getButtonsMode()));
+                        switch (voice->getButtonsMode())
+                        {
+                        case 0:
+                            voice->setSynthesisMode();
+
+                            break;
+                        case 1:
+                            voice->loadPreset(7);
+                            break;
+                        case 2:
+                            voice->savePreset(7);
+                            break;
+                        }
                     }
                 }
+                break;
+            case (29):
+                if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
+                {
+                    if (controllerValue == 127)
+                    {
+                        voice->setButtonsMode();
+                    }
+                }
+                break;
             case (71):
                 if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                 {

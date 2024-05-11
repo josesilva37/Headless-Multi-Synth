@@ -128,15 +128,18 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
             switch (frequencySpacing)
             {
             case 0:
-                midiNoteIncreased = midiNoteNumber + oscillatorIndex;
+                midiNoteIncreased = midiNoteNumber;
                 break;
             case 1:
-                midiNoteIncreased = midiNoteNumber + (5 * oscillatorIndex);
+                midiNoteIncreased = midiNoteNumber + oscillatorIndex;
                 break;
             case 2:
-                midiNoteIncreased = midiNoteNumber + (7 * oscillatorIndex);
+                midiNoteIncreased = midiNoteNumber + (5 * oscillatorIndex);
                 break;
             case 3:
+                midiNoteIncreased = midiNoteNumber + (7 * oscillatorIndex);
+                break;
+            case 4:
                 midiNoteIncreased = midiNoteNumber + (12 * oscillatorIndex);
                 break;
             }
@@ -184,7 +187,7 @@ void SynthVoice::stopNote(float velocity, bool allowTailOff)
     adsrFilter.noteOff();
     adsr.noteOff();
 };
-void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue){
+void SynthVoice::controllerMoved(int controllerNumber, int newControllerValue) {
 
 };
 void SynthVoice::pitchWheelMoved(int newPitchWheelValue)
@@ -401,9 +404,51 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
         oscillatorsSinSparse.add(oscillatorSparse);
     }
 
-    wavetableLevel = 0.25f / (float)numberOfOscillators;
+    wavetableLevel = 0.7f / (float)numberOfOscillators;
 };
+void SynthVoice::setButtonsMode()
+{
+    juce::Logger::writeToLog("Mode:" + juce::String(buttonsMode));
 
+    if (buttonsMode == 2)
+    {
+        buttonsMode = 0;
+    }
+    else
+    {
+        buttonsMode++;
+    }
+    juce::Logger::writeToLog("Mode:" + juce::String(buttonsMode));
+}
+void SynthVoice::setSynthesisMode()
+{
+    if (synthesisMode == 3)
+    {
+        synthesisMode = 0;
+    }
+    else
+    {
+        synthesisMode++;
+    }
+    switch (synthesisMode)
+    {
+    case 1:
+        isWavetableOn = true;
+        break;
+    case 2:
+        isWavetableOn = false;
+        osc.setFmAlgh(1);
+        break;
+    case 3:
+        osc.setFmAlgh(2);
+        break;
+    case 4:
+        osc.setFmAlgh(3);
+        break;
+    default:
+        break;
+    }
+}
 void SynthVoice::setOscillatorHarmonics()
 {
     if (oscillatorHarmonics == 6)
@@ -415,10 +460,14 @@ void SynthVoice::setOscillatorHarmonics()
         oscillatorHarmonics++;
     }
 }
-void SynthVoice::setFrequencySpacing(){
-    if(frequencySpacing == 3){
+void SynthVoice::setFrequencySpacing()
+{
+    if (frequencySpacing == 4)
+    {
         frequencySpacing = 0;
-    }else{
+    }
+    else
+    {
         frequencySpacing++;
     }
 }
@@ -441,6 +490,10 @@ void SynthVoice::resetSynthParams()
     filter.setLFODepth(0);
     filter.setFilterCutOffFrequency(1000);
     whitenoiseLevel = 0;
+    isWavetableOn = false;
+    buttonsMode = 0;
+    synthesisMode = 0;
+    osc.setFmAlgh(0);
 }
 juce::ValueTree SynthVoice::serialize()
 {
@@ -476,6 +529,9 @@ juce::ValueTree SynthVoice::serialize()
     tree.setProperty("Delay", delay.getDelay(), nullptr);
     tree.setProperty("EnabledDelay", enableDelay ? "true" : "false", nullptr);
     tree.setProperty("EnabledReverb", reverb.isEnabled() ? "true" : "false", nullptr);
+    tree.setProperty("isWavetableOn", isWavetableOn ? "true" : false, nullptr);
+    tree.setProperty("synthesisMode", synthesisMode, nullptr);
+
     return tree;
 }
 void SynthVoice::savePreset(int presetNumber)

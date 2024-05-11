@@ -220,15 +220,78 @@ void OscData::setPitchBend(float pitchBendValue)
     double pitchBendFrequencyMultiplier = std::pow(2.0, bendInSemitones / 12.0);
     pitchBendFreq = lastFreq * pitchBendFrequencyMultiplier;
 }
+//DX7 6 Algorithm
+void OscData::processFMAlgh3(juce::AudioBuffer<float> &buffer)
+{
+    juce::dsp::AudioBlock<float> block{buffer};
+
+    for (int ch = 0; ch < block.getNumChannels(); ++ch)
+    {
+        auto *data = buffer.getWritePointer(ch);
+        for (int s = 0; s < block.getNumSamples(); ++s)
+        {
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * op1Depth;
+            op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * op3Depth;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
+
+            float op5Frequency = OP5.getFrequency() + op5Mod * 0.5;
+            OP5.setFrequency(std::abs(op5Frequency));
+
+            float op4Frequency = OP4.getFrequency() + op5Mod;
+            OP4.setFrequency(std::abs(op4Frequency));
+
+
+            float chain2Freq = lastFreq + op5Mod;
+
+            float currentFreq = lastFreq + op1Mod + op2Mod + op3Mod;
+
+            setFrequency(std::abs(currentFreq));
+            OP4.setFrequency(std::abs(chain2Freq));
+
+            data[s] += OP4.processSample(0);
+        }
+    }
+}
+//DX7 12
+void OscData::processFMAlgh2(juce::AudioBuffer<float> &buffer)
+{
+    juce::dsp::AudioBlock<float> block{buffer};
+
+    for (int ch = 0; ch < block.getNumChannels(); ++ch)
+    {
+        auto *data = buffer.getWritePointer(ch);
+        for (int s = 0; s < block.getNumSamples(); ++s)
+        {
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * op1Depth;
+            op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * op3Depth;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
+
+            float op5Frequency = OP5.getFrequency() + op5Mod * 0.5;
+            OP5.setFrequency(std::abs(op5Frequency));
+
+            float op4Frequency = OP4.getFrequency() + op5Mod;
+            OP4.setFrequency(std::abs(op4Frequency));
+
+
+            float chain2Freq = lastFreq + op5Mod;
+
+            float currentFreq = lastFreq + op1Mod + op2Mod + op3Mod;
+
+            setFrequency(std::abs(currentFreq));
+            OP4.setFrequency(std::abs(chain2Freq));
+
+            data[s] += OP4.processSample(0);
+        }
+    }
+}
 
 void OscData::processFMAlgh1(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
-    juce::Logger::writeToLog("op1" + juce::String(OP1.getFrequency()));
-    juce::Logger::writeToLog("op2" + juce::String(OP2.getFrequency()));
-    juce::Logger::writeToLog("op3" + juce::String(OP3.getFrequency()));
-    juce::Logger::writeToLog("op4" + juce::String(OP4.getFrequency()));
-    juce::Logger::writeToLog("op5" + juce::String(OP5.getFrequency()));
 
     for (int ch = 0; ch < block.getNumChannels(); ++ch)
     {
@@ -250,7 +313,7 @@ void OscData::processFMAlgh1(juce::AudioBuffer<float> &buffer)
             float op3Frequency = OP3.getFrequency() + op4Mod;
             OP3.setFrequency(std::abs(op3Frequency));
 
-            float chain2Freq = lastFreq + op3Mod + op4Mod + op5Mod;
+            float chain2Freq = lastFreq + op3Mod;
 
             float currentFreq = lastFreq + op1Mod;
 
@@ -286,6 +349,12 @@ void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
         break;
     case 1:
         processFMAlgh1(buffer);
+        break;
+    case 2:
+        processFMAlgh2(buffer);
+        break;
+    case 3:
+        processFMAlgh3(buffer);
         break;
     }
 

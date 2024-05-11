@@ -32,7 +32,13 @@ public:
   float getLFODepth();
   void setPitchBend(float bend);
   void processFMAlgh1(juce::AudioBuffer<float> &buffer);
-  void setFmAlgh(){if(FmAlgh!=1){FmAlgh++;}else{FmAlgh==0;};}
+  void processFMAlgh2(juce::AudioBuffer<float> &buffer);
+  void processFMAlgh3(juce::AudioBuffer<float> &buffer);
+  void processFMAlgh4(juce::AudioBuffer<float> &buffer);
+  void processFMAlgh5(juce::AudioBuffer<float> &buffer);
+  void processFMAlgh6(juce::AudioBuffer<float> &buffer);
+
+  void setFmAlgh(int fm){FmAlgh = fm;};
   int getFmAlgh(){return FmAlgh;};
   void setSelectedOperator(){if(selectedOperator!=5){selectedOperator++;}else{selectedOperator=1;}};
 

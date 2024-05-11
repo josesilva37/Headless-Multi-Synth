@@ -46,6 +46,9 @@ public:
     void createWaveTable();
     void setOscillatorHarmonics();
     void setFrequencySpacing();
+    void setSynthesisMode();
+    void setButtonsMode();
+    int getButtonsMode(){return buttonsMode;};
 private:
     OscData osc;
     juce::AudioBuffer<float> synthBuffer;
@@ -92,4 +95,6 @@ private:
     int oscillatorHarmonics = 0;
     bool isWavetableOn = false;
     int frequencySpacing = 0;
+    int buttonsMode = 0;
+    int synthesisMode =0;
 };
