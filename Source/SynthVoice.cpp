@@ -422,7 +422,7 @@ void SynthVoice::setButtonsMode()
 }
 void SynthVoice::setSynthesisMode()
 {
-    if (synthesisMode == 3)
+    if (synthesisMode == 7)
     {
         synthesisMode = 0;
     }
@@ -444,6 +444,15 @@ void SynthVoice::setSynthesisMode()
         break;
     case 4:
         osc.setFmAlgh(3);
+        break;
+    case 5:
+        osc.setFmAlgh(4);
+        break;
+    case 6:
+        osc.setFmAlgh(5);
+        break;
+    case 7:
+        osc.setFmAlgh(6);
         break;
     default:
         break;
@@ -494,6 +503,16 @@ void SynthVoice::resetSynthParams()
     buttonsMode = 0;
     synthesisMode = 0;
     osc.setFmAlgh(0);
+    osc.setOp1Freq(440);
+    osc.setOp1Depth(0);
+    osc.setOp2Freq(440);
+    osc.setOp2Depth(0);
+    osc.setOp3Freq(440);
+    osc.setOp3Depth(0);
+    osc.setOp4Freq(440);
+    osc.setOp4Depth(0);
+    osc.setOp5Freq(440);
+    osc.setOp5Depth(0);
 }
 juce::ValueTree SynthVoice::serialize()
 {
@@ -529,9 +548,9 @@ juce::ValueTree SynthVoice::serialize()
     tree.setProperty("Delay", delay.getDelay(), nullptr);
     tree.setProperty("EnabledDelay", enableDelay ? "true" : "false", nullptr);
     tree.setProperty("EnabledReverb", reverb.isEnabled() ? "true" : "false", nullptr);
-    tree.setProperty("isWavetableOn", isWavetableOn ? "true" : false, nullptr);
+    tree.setProperty("isWavetableOn", isWavetableOn ? "true" : "false", nullptr);
     tree.setProperty("synthesisMode", synthesisMode, nullptr);
-
+    osc.getFMOperatorsTreeParams(tree);
     return tree;
 }
 void SynthVoice::savePreset(int presetNumber)
@@ -605,8 +624,16 @@ void SynthVoice::loadPreset(int presetNumber)
         whitenoiseParams.decay = xml->getStringAttribute("DecayWhitenoise").getFloatValue();
         whitenoiseParams.sustain = xml->getStringAttribute("SustainWhitenoise").getFloatValue();
         whitenoiseParams.release = xml->getStringAttribute("ReleaseWhitenoise").getFloatValue();
-
-        // deserializeParams(xml);
+        osc.setOp1Freq(xml->getStringAttribute("OP1Freq").getFloatValue());
+        osc.setOp1Depth(xml->getStringAttribute("OP1Depth").getFloatValue());
+        osc.setOp2Freq(xml->getStringAttribute("OP2Freq").getFloatValue());
+        osc.setOp2Depth(xml->getStringAttribute("OP2Depth").getFloatValue());
+        osc.setOp3Freq(xml->getStringAttribute("OP3Freq").getFloatValue());
+        osc.setOp3Depth(xml->getStringAttribute("OP3Depth").getFloatValue());
+        osc.setOp4Freq(xml->getStringAttribute("OP4Freq").getFloatValue());
+        osc.setOp4Depth(xml->getStringAttribute("OP4Depth").getFloatValue());
+        osc.setOp5Freq(xml->getStringAttribute("OP5Freq").getFloatValue());
+        osc.setOp5Depth(xml->getStringAttribute("OP5Depth").getFloatValue());
     }
     else
     {

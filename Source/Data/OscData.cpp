@@ -103,6 +103,19 @@ int OscData::getFmType()
     return fmType;
 }
 
+void OscData::getFMOperatorsTreeParams(juce::ValueTree tree)
+{
+    tree.setProperty("OP1Freq", OP1.getFrequency(), nullptr);
+    tree.setProperty("OP1Depth", op1Depth, nullptr);
+    tree.setProperty("OP2Freq", OP2.getFrequency(), nullptr);
+    tree.setProperty("OP2Depth", op2Depth, nullptr);
+    tree.setProperty("OP3Freq", OP3.getFrequency(), nullptr);
+    tree.setProperty("OP3Depth", op3Depth, nullptr);
+    tree.setProperty("OP4Freq", OP4.getFrequency(), nullptr);
+    tree.setProperty("OP4Depth", op4Depth, nullptr);
+    tree.setProperty("OP5Freq", OP5.getFrequency(), nullptr);
+    tree.setProperty("OP5Depth", op5Depth, nullptr);
+}
 void OscData::setFmDepth(const float depth)
 {
     if (FmAlgh == 0)
@@ -220,11 +233,11 @@ void OscData::setPitchBend(float pitchBendValue)
     double pitchBendFrequencyMultiplier = std::pow(2.0, bendInSemitones / 12.0);
     pitchBendFreq = lastFreq * pitchBendFrequencyMultiplier;
 }
-//DX7 6 Algorithm
-void OscData::processFMAlgh3(juce::AudioBuffer<float> &buffer)
+
+// DX7 Algorithm 19
+void OscData::processFMAlgh6(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
-
     for (int ch = 0; ch < block.getNumChannels(); ++ch)
     {
         auto *data = buffer.getWritePointer(ch);
@@ -236,25 +249,94 @@ void OscData::processFMAlgh3(juce::AudioBuffer<float> &buffer)
             op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
             op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
 
-            float op5Frequency = OP5.getFrequency() + op5Mod * 0.5;
-            OP5.setFrequency(std::abs(op5Frequency));
+            OP1.setFrequency(std::abs(lastFreq + op5Mod));
+            OP2.setFrequency(std::abs(lastFreq + op5Mod + op5Mod * 0.5));
+            setFrequency(std::abs(lastFreq + op3Mod + op4Mod));
 
-            float op4Frequency = OP4.getFrequency() + op5Mod;
-            OP4.setFrequency(std::abs(op4Frequency));
-
-
-            float chain2Freq = lastFreq + op5Mod;
-
-            float currentFreq = lastFreq + op1Mod + op2Mod + op3Mod;
-
-            setFrequency(std::abs(currentFreq));
-            OP4.setFrequency(std::abs(chain2Freq));
-
-            data[s] += OP4.processSample(0);
+            data[s] += OP1.processSample(0);
+            data[s] += OP2.processSample(0);
         }
     }
 }
-//DX7 12
+
+// DX7 Algorithm 18
+void OscData::processFMAlgh5(juce::AudioBuffer<float> &buffer)
+{
+    juce::dsp::AudioBlock<float> block{buffer};
+    for (int ch = 0; ch < block.getNumChannels(); ++ch)
+    {
+        auto *data = buffer.getWritePointer(ch);
+        for (int s = 0; s < block.getNumSamples(); ++s)
+        {
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * op1Depth;
+            op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * op3Depth;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
+
+            OP3.setFrequency(std::abs(OP3.getFrequency() + op4Mod + op5Mod));
+            OP2.setFrequency(std::abs(OP2.getFrequency() + op2Mod * 0.5));
+
+            setFrequency(std::abs(lastFreq + op1Mod + op2Mod + op3Mod));
+        }
+    }
+}
+
+// DX7 16 Algorithm
+void OscData::processFMAlgh4(juce::AudioBuffer<float> &buffer)
+{
+    juce::dsp::AudioBlock<float> block{buffer};
+    for (int ch = 0; ch < block.getNumChannels(); ++ch)
+    {
+        auto *data = buffer.getWritePointer(ch);
+        for (int s = 0; s < block.getNumSamples(); ++s)
+        {
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * op1Depth;
+            op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * op3Depth;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
+
+            OP5.setFrequency(std::abs(OP5.getFrequency() + op5Mod * 0.5));
+            OP2.setFrequency(std::abs(OP2.getFrequency() + op3Mod));
+            OP4.setFrequency(std::abs(OP4.getFrequency() + op5Mod));
+
+            setFrequency(std::abs(lastFreq + op1Mod + op2Mod + op4Mod));
+        }
+    }
+}
+
+// DX7 6 Algorithm
+void OscData::processFMAlgh3(juce::AudioBuffer<float> &buffer)
+{
+    juce::dsp::AudioBlock<float> block{buffer};
+    for (int ch = 0; ch < block.getNumChannels(); ++ch)
+    {
+        auto *data = buffer.getWritePointer(ch);
+        for (int s = 0; s < block.getNumSamples(); ++s)
+        {
+            op1Mod = OP1.processSample(block.getSample(ch, s)) * op1Depth;
+            op2Mod = OP2.processSample(block.getSample(ch, s)) * op2Depth;
+            op3Mod = OP3.processSample(block.getSample(ch, s)) * op3Depth;
+            op4Mod = OP4.processSample(block.getSample(ch, s)) * op4Depth;
+            op5Mod = OP5.processSample(block.getSample(ch, s)) * op5Depth;
+
+            float freqOp5 = OP5.getFrequency() + op2Mod;
+            float currentFreq = lastFreq + op3Mod;
+            float freqOp1 = lastFreq + op4Mod;
+            float freqOp2 = lastFreq + op5Mod;
+
+            OP5.setFrequency(std::abs(freqOp5));
+            setFrequency(std::abs(currentFreq));
+            OP1.setFrequency(std::abs(freqOp1));
+            OP2.setFrequency(std::abs(freqOp2));
+
+            data[s] += OP1.processSample(0);
+            data[s] += OP2.processSample(0);
+        }
+    }
+}
+// DX7 12 Algorithm
 void OscData::processFMAlgh2(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
@@ -276,7 +358,6 @@ void OscData::processFMAlgh2(juce::AudioBuffer<float> &buffer)
             float op4Frequency = OP4.getFrequency() + op5Mod;
             OP4.setFrequency(std::abs(op4Frequency));
 
-
             float chain2Freq = lastFreq + op5Mod;
 
             float currentFreq = lastFreq + op1Mod + op2Mod + op3Mod;
@@ -288,7 +369,7 @@ void OscData::processFMAlgh2(juce::AudioBuffer<float> &buffer)
         }
     }
 }
-
+// DX7 Algorithm 1
 void OscData::processFMAlgh1(juce::AudioBuffer<float> &buffer)
 {
     juce::dsp::AudioBlock<float> block{buffer};
@@ -355,6 +436,17 @@ void OscData::getNextAudioBlock(juce::AudioBuffer<float> &buffer)
         break;
     case 3:
         processFMAlgh3(buffer);
+        break;
+    case 4:
+        processFMAlgh4(buffer);
+        break;
+    case 5:
+        processFMAlgh5(buffer);
+        break;
+    case 6:
+        processFMAlgh6(buffer);
+        break;
+    default:
         break;
     }
 
