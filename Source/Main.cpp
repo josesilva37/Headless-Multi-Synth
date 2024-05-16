@@ -272,7 +272,7 @@ public:
                         voice->changeRelease(scaledRelease);
                     }
                     break;
-                case (91):
+                case (17):
                     if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                     {
                         int minControllerValue = 0;
@@ -319,7 +319,7 @@ public:
                         voice->changeFmDepth(scaledModulation);
                     }
                     break;
-                case (17):
+                case (91):
                     if (auto voice = dynamic_cast<SynthVoice *>(mySynth.getVoice(0)))
                     {
                         int minControllerValue = 0;
