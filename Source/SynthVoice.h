@@ -49,6 +49,7 @@ public:
     void setSynthesisMode();
     void setButtonsMode();
     int getButtonsMode(){return buttonsMode;};
+    void setMixChorus(float value);
 private:
     OscData osc;
     juce::AudioBuffer<float> synthBuffer;
@@ -67,6 +68,8 @@ private:
     juce::dsp::Reverb reverb;
     juce::dsp::Reverb::Parameters reverbParams;
     juce::dsp::DelayLine<float, juce::dsp::DelayLineInterpolationTypes::Linear> delay;
+    juce::dsp::Chorus<float> chorus;
+    float chorusMix = 0;
     bool enableDelay = false;
     juce::dsp::Limiter<float> limiter;
     float feedbackAttenuation = 0.7f;

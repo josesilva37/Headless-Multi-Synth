@@ -95,6 +95,7 @@ void SynthVoice::changeFilterResonance(float resonsance)
 
 void SynthVoice::setLFOControl(int type)
 {
+    juce::Logger::writeToLog(juce::String(LFOControl));
     LFOControl = type;
 }
 void SynthVoice::setADSRControl(int type)
@@ -363,12 +364,16 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     spec.maximumBlockSize = samplesPerBlock;
     spec.sampleRate = sampleRate;
     spec.numChannels = outputChannels;
-
     lfo.prepare(spec);
     lfo.setFrequency(20.0f);
     osc.prepareToPlay(spec);
     osc.setType(0);
-
+    chorus.prepare(spec);
+    chorus.setCentreDelay(50);
+    chorus.setDepth(0.15);
+    chorus.setFeedback(0.5);
+    chorus.setRate(50);
+    chorus.setMix(0);
     filter.prepareToPlay(spec);
     gain.prepare(spec);
     gain.setRampDurationSeconds(0.5);
@@ -480,10 +485,19 @@ void SynthVoice::setFrequencySpacing()
         frequencySpacing++;
     }
 }
+
+void SynthVoice::setMixChorus(float value){
+    chorus.setMix(value);
+    chorusMix = value;
+}
 void SynthVoice::resetSynthParams()
 {
-    adsr.reset();
-    adsrFilter.reset();
+    adsrParams.attack = 1;
+    adsrParams.decay = 1;
+    adsrParams.sustain = 1;
+    adsrParams.release = 1;
+    adsr.setParameters(adsrParams);
+    adsrFilter.setParameters(adsrParams);
     lfoDepth = 0;
     lfo.setFrequency(20.0f);
     reverbParams.damping = 0.5f;
@@ -498,6 +512,7 @@ void SynthVoice::resetSynthParams()
     osc.setLFODepth(0);
     filter.setLFODepth(0);
     filter.setFilterCutOffFrequency(1000);
+    chorus.setMix(0);
     whitenoiseLevel = 0;
     isWavetableOn = false;
     buttonsMode = 0;
@@ -550,6 +565,7 @@ juce::ValueTree SynthVoice::serialize()
     tree.setProperty("EnabledReverb", reverb.isEnabled() ? "true" : "false", nullptr);
     tree.setProperty("isWavetableOn", isWavetableOn ? "true" : "false", nullptr);
     tree.setProperty("synthesisMode", synthesisMode, nullptr);
+    tree.setProperty("chorus", chorusMix, nullptr);
     osc.getFMOperatorsTreeParams(tree);
     return tree;
 }
@@ -624,6 +640,7 @@ void SynthVoice::loadPreset(int presetNumber)
         whitenoiseParams.decay = xml->getStringAttribute("DecayWhitenoise").getFloatValue();
         whitenoiseParams.sustain = xml->getStringAttribute("SustainWhitenoise").getFloatValue();
         whitenoiseParams.release = xml->getStringAttribute("ReleaseWhitenoise").getFloatValue();
+        chorus.setMix(xml->getStringAttribute("chorus").getFloatValue());
         osc.setOp1Freq(xml->getStringAttribute("OP1Freq").getFloatValue());
         osc.setOp1Depth(xml->getStringAttribute("OP1Depth").getFloatValue());
         osc.setOp2Freq(xml->getStringAttribute("OP2Freq").getFloatValue());
@@ -646,7 +663,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
 {
     juce::dsp::AudioBlock<float> audioBlock{outputBuffer};
 
-    float lfoValue = lfo.processSample(0);
+    float lfoValue = lfo.processSample(0); // Release the corresponding note in your synth
 
     float lfoMod = (lfoValue * lfoDepth) / 500;
 
@@ -746,7 +763,7 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
             }
         }
     }
-
+    chorus.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 };
