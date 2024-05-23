@@ -146,7 +146,7 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
             }
             if (midiNoteIncreased <= 127)
             {
-                juce::Logger::writeToLog(juce::String(midiNoteIncreased));
+                juce::Logger::writeToLog(juce::String(midiNoteIncreased) + juce::String(oscillatorHarmonics));
                 switch (oscillatorHarmonics)
                 {
                 case 0:
@@ -169,6 +169,9 @@ void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::Synthesiser
                     break;
                 case 6:
                     oscillatorsSinSparse[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
+                    break;
+                case 7:
+                    oscillatorsMulti[oscillatorIndex]->setFrequency(juce::MidiMessage::getMidiNoteInHertz(midiNoteIncreased), getSampleRate());
                     break;
                 }
             }
@@ -245,6 +248,7 @@ void SynthVoice::createWaveTable()
     waveTableSinDecreasing.clear();
     waveTableSinSparse.setSize(1, (int)tableSize + 1);
     waveTableSinSparse.clear();
+    waveTableMultiWaveForm.setSize(1, (int)tableSize + 1);
 
     // Harmonics
     int balancedHarmonics[] = {1, 2, 3, 4, 5, 6, 7, 8};
@@ -260,6 +264,8 @@ void SynthVoice::createWaveTable()
     int sparceHarmonics[] = {1, 3, 7, 13, 19, 25, 31, 37};
     float sparseHarmonicWeights[] = {0.5f, 0.2f, 0.1f, 0.05f, 0.03f, 0.02f, 0.01f, 0.005f};
 
+    int *harmonicsArray[6] = {balancedHarmonics, evenHarmonics, oddHarmonics, increasingHarmonics, decreasingHarmonics, sparceHarmonics};
+    float *harmonicsWeightArray[6] = {balancedHarmonicWeights, evenHarmonicWeights, oddHarmonicWeights, increasingHarmonicWeights, decreasingHarmonicWeights, sparseHarmonicWeights};
     // Wavetable buffer
     auto *samplesSin = waveTableSin.getWritePointer(0);
     auto *samplesSinBalanced = waveTableSinBalanced.getWritePointer(0);
@@ -268,6 +274,7 @@ void SynthVoice::createWaveTable()
     auto *samplesSinIncreasing = waveTableSinIncreasing.getWritePointer(0);
     auto *samplesSinDecreasing = waveTableSinDecreasing.getWritePointer(0);
     auto *samplesSinSparse = waveTableSinSparse.getWritePointer(0);
+    auto *samplesMultiForm = waveTableMultiWaveForm.getWritePointer(0);
 
     // Simple Sin Wavetable
     auto angleDelta = juce::MathConstants<double>::twoPi / (double)(tableSize - 1);
@@ -290,13 +297,15 @@ void SynthVoice::createWaveTable()
         auto angleDeltaDecreasing = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * decreasingHarmonics[harmonic];
         auto angleDeltaSparse = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * sparceHarmonics[harmonic];
 
+        // auto angleDeltaMulti = juce::MathConstants<double>::twoPi / (double)(tableSize - 1) * harmonicsArray[harmonic][harmonic];
+
         auto currentAngleBalanced = 0.0;
         auto currentAngleOdd = 0.0;
         auto currentAngleEven = 0.0;
         auto currentAngleIncreased = 0.0;
         auto currentAngleDecreased = 0.0;
         auto currentAngleSparse = 0.0;
-
+        auto currentAngleMulti = 0.0;
         for (unsigned int i = 0; i < tableSize; ++i)
         {
             auto sampleSinBalanced = 0.0f;
@@ -305,7 +314,7 @@ void SynthVoice::createWaveTable()
             auto sampleSinIncreased = 0.0f;
             auto sampleSinDecreased = 0.0f;
             auto sampleSinSparse = 0.0f;
-
+            auto sampleMulti = 0.0f;
             for (int table = 0; table < 6; table++)
             {
                 switch (table)
@@ -340,6 +349,11 @@ void SynthVoice::createWaveTable()
                     samplesSinSparse[i] += (float)sampleSinSparse * sparseHarmonicWeights[harmonic];
                     currentAngleSparse += angleDeltaSparse;
                     break;
+                // case 6:
+                //     sampleMulti = std::sin(currentAngleMulti);
+                //     samplesMultiForm[i] += (float)sampleMulti * harmonicsWeightArray[i][harmonic];
+                //     currentAngleMulti += angleDeltaMulti;
+                //     break;
                 default:
                     break;
                 }
@@ -354,6 +368,7 @@ void SynthVoice::createWaveTable()
     samplesSinIncreasing[tableSize] = samplesSinIncreasing[0];
     samplesSinDecreasing[tableSize] = samplesSinDecreasing[0];
     samplesSinSparse[tableSize] = samplesSinSparse[0];
+    samplesMultiForm[tableSize] = samplesMultiForm[0];
 }
 void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outputChannels)
 {
@@ -407,6 +422,8 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
         oscillatorsSinDecreasing.add(oscillatorDecreasing);
         auto *oscillatorSparse = new WavetableOscillator(waveTableSinSparse);
         oscillatorsSinSparse.add(oscillatorSparse);
+        auto *oscillatorsMultiForm =  new WavetableOscillator(waveTableMultiWaveForm);
+        oscillatorsMulti.add(oscillatorsMultiForm);
     }
 
     wavetableLevel = 0.7f / (float)numberOfOscillators;
@@ -465,7 +482,7 @@ void SynthVoice::setSynthesisMode()
 }
 void SynthVoice::setOscillatorHarmonics()
 {
-    if (oscillatorHarmonics == 6)
+    if (oscillatorHarmonics == 7)
     {
         oscillatorHarmonics = 0;
     }
@@ -486,7 +503,8 @@ void SynthVoice::setFrequencySpacing()
     }
 }
 
-void SynthVoice::setMixChorus(float value){
+void SynthVoice::setMixChorus(float value)
+{
     chorus.setMix(value);
     chorusMix = value;
 }
@@ -707,6 +725,9 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
                 break;
             case 6:
                 oscillator = oscillatorsSinSparse.getUnchecked(oscillatorIndex);
+                break;
+            case 7:
+                oscillator = oscillatorsMulti.getUnchecked(oscillatorIndex);
                 break;
             }
 

@@ -87,6 +87,7 @@ private:
     juce::OwnedArray<WavetableOscillator> oscillatorsSinIncreasing;
     juce::OwnedArray<WavetableOscillator> oscillatorsSinDecreasing;
     juce::OwnedArray<WavetableOscillator> oscillatorsSinSparse;
+    juce::OwnedArray<WavetableOscillator> oscillatorsMulti;
     const unsigned int tableSize = 1 << 7;
     juce::AudioSampleBuffer waveTableSin;
     juce::AudioSampleBuffer waveTableSinBalanced;
@@ -95,6 +96,7 @@ private:
     juce::AudioSampleBuffer waveTableSinIncreasing;
     juce::AudioSampleBuffer waveTableSinDecreasing;
     juce::AudioSampleBuffer waveTableSinSparse;
+    juce::AudioSampleBuffer waveTableMultiWaveForm;
     int oscillatorHarmonics = 0;
     bool isWavetableOn = false;
     int frequencySpacing = 0;
