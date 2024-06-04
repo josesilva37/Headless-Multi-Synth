@@ -119,7 +119,8 @@ void SynthVoice::changeFilterLFOFreq(float level)
     filter.setLFOFreq(level);
 }
 void SynthVoice::startNote(int midiNoteNumber, float velocity, juce::SynthesiserSound *sound, int currentPitchWheelPosition)
-{
+{   
+    juce::Logger::writeToLog(juce::String(juce::MidiMessage::getMidiNoteName(midiNoteNumber, true, true, 4)));
     if (isWavetableOn)
     {
 
@@ -388,7 +389,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
     delay.setMaximumDelayInSamples(44100 * 2);
     whitenoiseParams.release = 0.4f;
     limiter.prepare(spec);
-    limiter.setThreshold(0.5f);
+    limiter.setThreshold(-3.0f);
 
     auto numberOfOscillators = 10;
     for (auto i = 0; i < numberOfOscillators; ++i)
@@ -409,7 +410,7 @@ void SynthVoice::prepareToPlay(double sampleRate, int samplesPerBlock, int outpu
         oscillatorsSinSparse.add(oscillatorSparse);
     }
 
-    wavetableLevel = 0.7f / (float)numberOfOscillators;
+    wavetableLevel = 0.6f / (float)numberOfOscillators;
 };
 void SynthVoice::setButtonsMode()
 {
@@ -764,6 +765,6 @@ void SynthVoice::renderNextBlock(juce::AudioBuffer<float> &outputBuffer, int sta
         }
     }
     chorus.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
-    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
     limiter.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
 };
